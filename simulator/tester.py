@@ -29,38 +29,153 @@ class Tester():
 
         return ans_dict
 
-    def solve_second_stages(
-        self, inst, sol, n_scenarios, reward
+    def solve_second_stages(self, 
+        inst, sol, n_scenarios, demand_matrix
     ):
         ans = []
+        dict_data = inst.get_data()
         obj_fs = 0
-        for i in range(inst.n_items):
-            obj_fs += inst.profits[i] * sol[i]
-        items = range(inst.n_items)
+        n_stations = inst.n_stations
+        stations = range(n_stations)
+        for i in stations:
+            obj_fs += dict_data["procurement_cost"] * sol[i]
+        
+        
         for s in range(n_scenarios):
             problem_name = "SecondStagePrb"
             model = gp.Model(problem_name)
-            Y = model.addVars(
-                inst.n_items,
-                lb=0,
-                ub=1,
-                vtype=GRB.INTEGER,
-                name='Y'
-            )
-
-            obj_funct = gp.quicksum(reward[i, s] * Y[i] for i in items)
-
-            model.setObjective(obj_funct, GRB.MAXIMIZE)
             
-            model.addConstr(
-                gp.quicksum(inst.sizes_ss[i] * Y[i] for i in items) <= inst.max_size_ss,
-                f"volume_limit_ss"
+            ### Variables
+            
+            I_plus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='I+'
             )
-            for i in items:
+
+            I_minus = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='I-'
+            )
+
+            O_plus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='O+'
+            )
+
+            O_minus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='O-'
+            )
+
+            T_plus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='T+'
+            )
+
+            T_minus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='T-'
+            )
+
+
+            tau = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='tau'
+            )
+
+            beta = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='beta'
+            )
+
+            rho = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='rho'
+            )
+
+            
+            ### Objective Function
+        
+            obj_funct = gp.quicksum(
+                (
+                    dict_data['stock_out_cost'][i]*gp.quicksum(I_minus[i, j] for j in stations) +
+                    dict_data["time_waste_cost"][i]*O_minus[i] +
+                    gp.quicksum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
+                ) for i in stations
+            )
+
+            model.setObjective(obj_funct, GRB.MINIMIZE)
+            
+            ### Costraints
+            
+            for i in stations:
+                for j in stations:
+                    model.addConstr(
+                        beta[i, j] == demand_matrix[i, j, s] - I_minus[i, j],
+                        f"rented_bikes_number"
+                    )
+                
+            for i in stations:
                 model.addConstr(
-                    Y[i] <= sol[i],
-                    f"link_X_Y_for_item_{i}"
+                    I_plus[i] - gp.quicksum(I_minus[i,j] for j in stations) == sol[i] - gp.quicksum(demand_matrix[i, j, s] for j in stations),
+                    f"surplus_shortage_balance"
                 )
+
+            for i in stations:
+                model.addConstr(
+                    O_plus[i] - O_minus[i] == dict_data['station_cap'][i] - sol[i] + gp.quicksum(beta[i,j] for j in stations) - gp.quicksum(beta[j, i] for j in stations),
+                    f"residual_overflow_balance"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(rho[i,j] for j in stations) == O_minus[i],
+                    f"redir_bikes_eq_overflow"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(rho[j,i] for j in stations) <= O_plus[i],
+                    f"redir_bikes_not_resid_cap"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    T_plus[i] - T_minus[i] == dict_data['station_cap'][i] - O_plus[i] + gp.quicksum(rho[j,i] for j in stations) - sol[i],
+                    f"exceed_failure_balance"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(tau[i,j] for j in stations) == T_plus[i],
+                    f"tranship_equal_excess"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(tau[j,i] for j in stations) <= T_minus[i],
+                    f"tranship_equal_failure"
+                )
+
+
             model.update()
             model.setParam('OutputFlag', 0)
             model.setParam('LogFile', './logs/gurobi.log')
@@ -68,6 +183,168 @@ class Tester():
             ans.append(obj_fs + model.getObjective().getValue())
 
         return ans
+
+
+    def solve_wait_and_see(self, 
+        inst, n_scenarios, demand_matrix
+    ):
+        ans = []
+        dict_data = inst.get_data()
+        obj_fs = 0
+        n_stations = inst.n_stations
+        stations = range(n_stations)
+        
+        
+        for s in range(n_scenarios):
+            problem_name = "Wait_and_See_BikeShare"
+            model = gp.Model(problem_name)
+            
+            ### Variables
+            X = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='X'
+            )
+            
+            I_plus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='I+'
+            )
+
+            I_minus = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='I-'
+            )
+
+            O_plus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='O+'
+            )
+
+            O_minus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='O-'
+            )
+
+            T_plus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='T+'
+            )
+
+            T_minus = model.addVars(
+                n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='T-'
+            )
+
+
+            tau = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='tau'
+            )
+
+            beta = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='beta'
+            )
+
+            rho = model.addVars(
+                n_stations, n_stations,
+                lb=0,
+                vtype=GRB.INTEGER,
+                name='rho'
+            )
+            ### Objective Function
+            obj_funct = dict_data["procurement_cost"] * gp.quicksum(X[i] for i in stations)
+            
+            obj_funct += gp.quicksum(
+                (
+                    dict_data['stock_out_cost'][i]*gp.quicksum(I_minus[i, j] for j in stations) +
+                    dict_data["time_waste_cost"][i]*O_minus[i] +
+                    gp.quicksum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
+                ) for i in stations
+            )
+
+            model.setObjective(obj_funct, GRB.MINIMIZE)
+            
+            ### Costraints
+            
+            for i in stations:
+                for j in stations:
+                    model.addConstr(
+                        beta[i, j] == demand_matrix[i, j, s] - I_minus[i, j],
+                        f"rented_bikes_number"
+                    )
+                
+            for i in stations:
+                model.addConstr(
+                    I_plus[i] - gp.quicksum(I_minus[i,j] for j in stations) == X[i] - gp.quicksum(demand_matrix[i, j, s] for j in stations),
+                    f"surplus_shortage_balance"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    O_plus[i] - O_minus[i] == dict_data['station_cap'][i] - X[i] + gp.quicksum(beta[i,j] for j in stations) - gp.quicksum(beta[j, i] for j in stations),
+                    f"residual_overflow_balance"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(rho[i,j] for j in stations) == O_minus[i],
+                    f"redir_bikes_eq_overflow"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(rho[j,i] for j in stations) <= O_plus[i],
+                    f"redir_bikes_not_resid_cap"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    T_plus[i] - T_minus[i] == dict_data['station_cap'][i] - O_plus[i] + gp.quicksum(rho[j,i] for j in stations) - X[i],
+                    f"exceed_failure_balance"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(tau[i,j] for j in stations) == T_plus[i],
+                    f"tranship_equal_excess"
+                )
+
+            for i in stations:
+                model.addConstr(
+                    gp.quicksum(tau[j,i] for j in stations) <= T_minus[i],
+                    f"tranship_equal_failure"
+                )
+
+
+            model.update()
+            model.setParam('OutputFlag', 0)
+            model.setParam('LogFile', './logs/gurobi.log')
+            model.optimize()
+            ans.append(obj_fs + model.getObjective().getValue())
+
+        WS = np.average(ans)
+        return ans, WS
+
+
 
     def in_sample_stability(self, problem, sampler, instance, n_repertions, n_scenarios_sol):
         ans = [0] * n_repertions

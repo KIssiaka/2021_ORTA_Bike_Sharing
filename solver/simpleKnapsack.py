@@ -22,11 +22,11 @@ class SimpleKnapsack():
 
         model = gp.Model(problem_name)
         X = model.addVars(
-            dict_data['n_items'],
-            lb=0,
-            ub=1,
-            vtype=GRB.INTEGER,
-            name='X'
+            dict_data['n_items'],   # cardinality
+            lb=0,                   # lower bound
+            ub=1,                   # upperbound
+            vtype=GRB.INTEGER,      # type (int or cont)
+            name='X'                # name
         )
         Y = model.addVars(
             dict_data['n_items'], n_scenarios,

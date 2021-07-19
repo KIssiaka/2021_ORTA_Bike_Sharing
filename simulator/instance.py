@@ -5,42 +5,46 @@ import numpy as np
 
 class Instance():
     def __init__(self, sim_setting):
+
         logging.info("starting simulation...")
-        self.max_size = sim_setting['knapsack_size']
-        self.sizes = np.around(np.random.uniform(
-            sim_setting['low_size'],
-            sim_setting['high_size'],
-            sim_setting['n_items']
-        ))
-        self.profits = np.around(np.random.uniform(
-            sim_setting['low_profit'],
-            sim_setting['high_profit'],
-            sim_setting['n_items']
-        ), 2)
-        self.n_items = sim_setting['n_items']
+        
+        self.n_stations = sim_setting['n_stations']
+        
+        #c
+        self.procurement_cost = sim_setting['procurement_cost'] 
+        
+        #v_i
+        self.stock_out_cost = [sim_setting['stock_out_cost']] * self.n_stations
+        
+        #w_i
+        self.time_waste_cost = [sim_setting['time_waste_cost']] * self.n_stations
+        
+        #t_ij
+        self.trans_ship_cost = [[sim_setting['trans_ship_cost'] for x in range(self.n_stations)] for y in range(self.n_stations)] 
+        
+        # k_i
+        self.stations_cap = np.around(np.random.uniform(
+                                sim_setting['station_max_cap'],
+                                sim_setting['station_min_cap'],
+                                size=self.n_stations
+                                )
+                            )
 
-        self.sizes_ss = np.around(np.random.uniform(
-            sim_setting['low_size'],
-            sim_setting['high_size'],
-            sim_setting['n_items']
-        ))
-        self.max_size_ss = sim_setting['knapsack_size']
-
-        logging.info(f"max_size: {self.max_size}")
-        logging.info(f"sizes: {self.sizes}")
-        logging.info(f"profits: {self.profits}")
-        logging.info(f"n_items: {self.n_items}")
-        logging.info(f"sizes_ss: {self.sizes_ss}")
-        logging.info(f"max_size_ss: {self.max_size_ss}")
+        logging.info(f"stations_number: {self.n_stations}")
+        logging.info(f"procurement_costs: {self.procurement_cost}")
+        logging.info(f"stock_out_costs: {self.stock_out_cost}")
+        logging.info(f"time_waste_cost: {self.time_waste_cost}")
+        logging.info(f"Trasnshipent_cost: {self.trans_ship_cost}")
+        logging.info(f"stations_capacity: {self.stations_cap}")
         logging.info("simulation end")
 
     def get_data(self):
         logging.info("getting data from instance...")
         return {
-            "profits": self.profits,
-            "sizes": self.sizes,
-            "max_size": self.max_size,
-            "n_items": self.n_items,
-            "sizes_ss": self.sizes_ss,
-            "max_size_ss": self.max_size_ss,
+            "procurement_cost": self.procurement_cost,
+            "stock_out_cost": self.stock_out_cost,
+            "time_waste_cost": self.time_waste_cost,
+            "trans_ship_cost": self.trans_ship_cost,
+            "n_stations": self.n_stations,
+            "station_cap": self.stations_cap
         }

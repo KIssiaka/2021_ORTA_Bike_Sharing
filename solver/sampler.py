@@ -8,11 +8,11 @@ class Sampler:
 
     def sample_ev(self, instance, n_scenarios):
         demand = self.sample_stoch(instance, n_scenarios)
-        return np.average(demand, axis=1)
+        return np.around(np.average(demand, axis=2))
 
     def sample_stoch(self, instance, n_scenarios):
         return np.around(np.absolute(np.random.normal(
             10,
-            1,
-            size=(instance.n_items, n_scenarios))
+            5,
+            size=(instance.n_stations, instance.n_stations, n_scenarios))
         ))
