@@ -54,6 +54,7 @@ if __name__ == '__main__':
         n_scenarios,
         verbose=True
     )
+    print(sol_exact)
 
     ## EXpected value problem
     mean_demand_matrix = sam.sample_ev(
@@ -84,6 +85,7 @@ if __name__ == '__main__':
     )
 
     RP = np.average(ris_RP)
+
 
     demand_1 = sam.sample_stoch(
         inst,

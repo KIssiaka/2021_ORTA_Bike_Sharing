@@ -12,7 +12,7 @@ class Sampler:
 
     def sample_stoch(self, instance, n_scenarios):
         return np.around(np.absolute(np.random.normal(
-            10,
-            5,
+            1,
+            0,
             size=(instance.n_stations, instance.n_stations, n_scenarios))
         ))
