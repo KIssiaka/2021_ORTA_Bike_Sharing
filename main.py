@@ -6,7 +6,6 @@ from matplotlib import rc_params
 import numpy as np
 from simulator.instance import Instance
 from simulator.tester import Tester
-from solver.simpleKnapsack import SimpleKnapsack
 from solver.BikeSharing import BikeSharing
 from heuristic.simpleHeu import SimpleHeu
 from solver.sampler import Sampler
@@ -34,6 +33,14 @@ if __name__ == '__main__':
 
     # Reward generation
     n_scenarios = 5
+    """
+    We create the demand matrixes by using a monte carlo distribution that chooses between:
+    - exponential
+    - uniform 
+    - normal 
+    distributions.
+    We also pass the inst variable which contains all the input settings.
+    """
     demand_matrix = sam.sample_stoch(
         inst,
         n_scenarios=n_scenarios
