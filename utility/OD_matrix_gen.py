@@ -8,9 +8,10 @@ min_od_matrix = np.around(np.absolute(np.random.uniform(
         ))
 
 max_od_matrix = np.around(np.absolute(np.random.uniform(
-            3,5,
+            5,10,
             size=(22, 22))
         ))
+
 
 mean_od_matrix = np.around(np.mean( np.array([ min_od_matrix, max_od_matrix ]), axis=0 ))
 
@@ -21,13 +22,15 @@ def normal_matrix():
 
 
 def uniform_matrix():
-    return np.around(np.random.uniform(min_od_matrix, max_od_matrix ))
+    return np.around(np.random.uniform(min_od_matrix, max_od_matrix))
 
 def exponential_matrix():
-    return np.around(np.random.uniform(mean_od_matrix))
+    return np.around(np.random.exponential(mean_od_matrix))
 
-n_scenarios = 5
-scenario_arrays = [exponential_matrix() for _ in range(n_scenarios)]
+n_scenarios = 1000
+
+func_list = [normal_matrix(), uniform_matrix(), exponential_matrix()]
+scenario_arrays = [func_list[random.randint(0,2)] for _ in range(n_scenarios)]
 scenario_res = np.stack(scenario_arrays, axis=2)
 
-print(scenario_res)
+scenario_res
