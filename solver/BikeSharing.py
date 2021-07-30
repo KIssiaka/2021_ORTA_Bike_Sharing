@@ -3,6 +3,7 @@ import time
 import logging
 import gurobipy as gp
 from gurobipy import GRB
+import numpy as np
 
 
 class BikeSharing():
@@ -93,7 +94,8 @@ class BikeSharing():
             name='rho'
         )
 
-                
+        
+          
         obj_funct = dict_data["procurement_cost"] * gp.quicksum(X[i] for i in stations)
 
         obj_funct += gp.quicksum(
@@ -104,7 +106,7 @@ class BikeSharing():
             )
             for i in stations for s in scenarios
         )/(n_scenarios + 0.0)
-        model.setObjective(obj_funct, GRB.MINIMIZE)
+        model.setObjective(obj_funct, GRB.MINIMIZE)       
 
 
         for i in stations:
@@ -196,6 +198,9 @@ class BikeSharing():
                 )
                 sol[i] = grb_var.X
             of = model.getObjective().getValue()
+
+        
+        
         return of, sol, comp_time
 
 
