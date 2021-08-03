@@ -4,6 +4,7 @@ import json
 import logging
 from matplotlib import rc_params
 import numpy as np
+import matplotlib.pyplot as plt
 from simulator.instance import Instance
 from simulator.tester import Tester
 from solver.BikeSharing import BikeSharing
@@ -55,14 +56,14 @@ if __name__ == '__main__':
     )
     #print(sol_exact)
 
-    heu = SimpleHeu()
-    of_heu, sol_heu, comp_time_heu = heu.solve(
-        dict_data,
-        demand_matrix,
-        n_scenarios,
-    )
-    print(of_heu, sol_heu, comp_time_heu)
-    print(of_exact, sol_exact, comp_time_exact)
+    # heu = SimpleHeu()
+    # of_heu, sol_heu, comp_time_heu = heu.solve(
+    #     dict_data,
+    #     demand_matrix,
+    #     n_scenarios,
+    # )
+    # print(of_heu, sol_heu, comp_time_heu)
+    # print(of_exact, sol_exact, comp_time_exact)
 
     ## EXpected value problem
     # mean_demand_matrix = sam.sample_ev(
@@ -78,10 +79,13 @@ if __name__ == '__main__':
     # )
 
     # COMPARISON:
-    # test = Tester()
-    # n_scenarios = 1000
+    test = Tester()
+    n_scenarios = 1000
     
+    res_in_sample = test.in_sample_stability(prb, sam, inst, 50, n_scenarios)
     
+    plt.hist(res_in_sample)
+    plt.show()
     # Recourse Problem
     # demand_RP = sam.sample_stoch(
     #     inst,

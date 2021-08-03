@@ -353,8 +353,9 @@ class Tester():
                 instance,
                 n_scenarios=n_scenarios_sol
             )
+            dict_data = instance.get_data()
             of, sol, comp_time = problem.solve(
-                instance,
+                dict_data,
                 reward,
                 n_scenarios_sol
             )
