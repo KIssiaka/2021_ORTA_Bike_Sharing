@@ -176,11 +176,11 @@ class SimpleHeu():
     
 
     def solve(
-        self, dict_data, demand_matrix, n_scenarios,
+        self, instance, demand_matrix, n_scenarios,
     ):
         ans = []
         of_array = []
-
+        dict_data = instance.get_data()
 
 
 
@@ -218,7 +218,7 @@ class SimpleHeu():
 
         # compute temporary global solution for first iteration
         TGS = np.average(x_s_array, axis=0).astype(int)
-        print("\nTGS", TGS)
+
 
         # least square method to check for convergence
         dev_from_sol = np.sum(abs(x_s_array-TGS), axis = 0)
@@ -231,7 +231,6 @@ class SimpleHeu():
             x_s_array = []
             of_array = []
             ans = []
-            print("\nITERAZIONE: ", k)
 
             # solve monoscenario problems
             for i, s in enumerate(np.rollaxis(scenarios, 2)):
@@ -242,7 +241,7 @@ class SimpleHeu():
 
             # compute temporary global solution for first iteration
             TGS = np.average(x_s_array, axis=0).astype(int)
-            print("TGS", TGS)
+            
 
             # update the multipliers
             lam = lam + rho*(x_s_array - TGS)

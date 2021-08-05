@@ -11,9 +11,10 @@ class BikeSharing():
         pass
 
     def solve(
-        self, dict_data, demand_matrix, n_scenarios, time_limit=None,
+        self, instance, demand_matrix, n_scenarios, time_limit=None,
         gap=None, verbose=False
     ):
+        dict_data = instance.get_data()
         n_stations = dict_data['n_stations']
         stations = range(n_stations)
         
@@ -206,9 +207,10 @@ class BikeSharing():
 
 
     def solve_EV(
-        self, dict_data, demand_matrix, time_limit=None,
+        self, instance, demand_matrix, time_limit=None,
         gap=None, verbose=False
     ):
+        dict_data = instance.get_data()
         n_stations = dict_data['n_stations']
         stations = range(n_stations)
         

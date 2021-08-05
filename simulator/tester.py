@@ -349,6 +349,8 @@ class Tester():
     def in_sample_stability(self, problem, sampler, instance, n_repertions, n_scenarios_sol):
         ans = [0] * n_repertions
         for i in range(n_repertions):
+            print("ITERAZIONE: ", i)
+            a = time.time()
             reward = sampler.sample_stoch(
                 instance,
                 n_scenarios=n_scenarios_sol
@@ -359,12 +361,16 @@ class Tester():
                 reward,
                 n_scenarios_sol
             )
+            b = time.time()
+            print("Time spent:", b-a)
             ans[i] = of
         return ans
     
     def out_of_sample_stability(self, problem, sampler, instance, n_repertions, n_scenarios_sol, n_scenarios_out):
         ans = [0] * n_repertions
         for i in range(n_repertions):
+            print("ITERAZIONE: ", i)
+            a = time.time()
             reward= sampler.sample_stoch(
                 instance,
                 n_scenarios=n_scenarios_sol
@@ -380,9 +386,10 @@ class Tester():
             )
             profits = self.solve_second_stages(
                 instance, sol,
-                n_scenarios_out, reward_out,
-                "profit"
+                n_scenarios_out, reward_out
             )
+            b = time.time()
+            print("Time spent:", b-a)
             ans[i]=np.mean(profits)
             
         return ans
