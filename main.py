@@ -11,6 +11,8 @@ from solver.BikeSharing import BikeSharing
 from heuristic.simpleHeu import SimpleHeu
 from solver.sampler import Sampler
 from utility.plot_results import plot_comparison_hist
+import csv
+import itertools
 
 np.random.seed(0)
 
@@ -32,8 +34,9 @@ if __name__ == '__main__':
     inst = Instance(sim_setting)
     dict_data = inst.get_data()
 
+
     # Reward generation
-    #n_scenarios = 1000
+    n_scenarios = 1000
     """
     We create the demand matrixes by using a monte carlo distribution that chooses between:
     - exponential
@@ -42,11 +45,10 @@ if __name__ == '__main__':
     distributions.
     We also pass the inst variable which contains all the input settings.
     """
-    # demand_matrix = sam.sample_stoch(
-    #     inst,
-    #     n_scenarios=n_scenarios
-    # )
-    # print(demand_matrix.shape)
+    demand_matrix = sam.sample_stoch(
+        inst,
+        n_scenarios=n_scenarios
+    )
 
 
     """
@@ -54,33 +56,49 @@ if __name__ == '__main__':
     """
     prb = BikeSharing()
     # of_exact, sol_exact, comp_time_exact = prb.solve(
-    #     dict_data,
+    #     inst,
     #     demand_matrix,
     #     n_scenarios,
     #     verbose=True
     # )
-    # #print(sol_exact)
+    #print(sol_exact)
 
     """
     heuristic solution using the progressive hedging algorithm
     """
     heu = SimpleHeu()
     # of_heu, sol_heu, comp_time_heu = heu.solve(
-    #     dict_data,
+    #     inst,
     #     demand_matrix,
     #     n_scenarios,
     # )
     # print(of_heu, sol_heu, comp_time_heu)
     # print(of_exact, sol_exact, comp_time_exact)
 
-    # COMPARISONS:
-    test = Tester()
-    n_scenarios = 1000
+    # printing results of a file
+    file_output = open(
+        "./results/grid_serach_penalty.csv",
+        "w"
+    )
+    file_output.write("method, of, sol, time, rho\n")
+
+
+    #for r, alpha, toll in itertools.izip(np.arange(0, 1, 0.1), np.arange(0, 1, 0.1), [10, 1, 1e-1, 1e-2, 1e-3, 1e-4]):
     
-    #res_in_sample = test.out_of_sample_stability(prb, sam, inst, 100, n_scenarios)
-    
-    #plt.hist(res_in_sample)
-    #plt.show()
+    for r in np.arange(0, 1, 0.1):
+        print("TRYING WITH PENALTY OF: ", r)
+        of_heu, sol_heu, comp_time_heu = heu.solve(
+            inst,
+            demand_matrix,
+            n_scenarios,
+            r
+        )
+
+        file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
+            "heu", of_heu, sol_heu, comp_time_heu, r#, alpha, toll
+        ))
+
+    file_output.close()
 
     # #########################################################
     # RECOURSE PROBLEM
@@ -117,6 +135,13 @@ if __name__ == '__main__':
     """
     The Scenarios are all blend together and only the average of them is considered. The resulting solution is clearly suboptimal but allows us to understand what is the actual loss in not considering stochasticity at all.
     """
+    # of_EV, sol_EV, comp_time_EV = prb.solve_EV(
+    #     dict_data,
+    #     demand_matrix,
+    #     n_scenarios,
+    #     verbose=True
+    # )
+
     # demand_EV = sam.sample_stoch(
     #     inst,
     #     n_scenarios=n_scenarios
@@ -165,11 +190,11 @@ if __name__ == '__main__':
     # n_scenarios = 1000
     # n_rep = 100
     
-    # ris1 = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios)
-    # ris2 = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios)
+    # in_samp_exact = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios)
+    # in_samp_heu = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios)
 
     # plot_comparison_hist(
-    #     [ris1, ris2],
+    #     [in_samp_exact, in_samp_heu],
     #     ["exact", "heuristic"],
     #     ['red', 'blue'], "In Sample Stability",
     #     "profit", "occurencies"
@@ -181,26 +206,39 @@ if __name__ == '__main__':
     """
     The out-of-sample stability test investigates whether a scenario generation method, with the selected sample  size,  creates  scenario  trees  that  provide  optimal  solutions  that  give  approximately  the  same optimal value as when using the true probability distribution.
     """
-    test = Tester()
-    n_scenarios_first = 500
-    n_scenarios_second = 500
-    n_rep = 100
-    print("OUT OF SAMPLE STABILITY ANALYSIS")
+    # n_scenarios_first = 500
+    # n_scenarios_second = 500
+    # n_rep = 100
+    # print("OUT OF SAMPLE STABILITY ANALYSIS")
     
-    print("EXACT MODEL START...")
-    ris1 = test.out_of_sample_stability(prb, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
+    # print("EXACT MODEL START...")
+    # out_samp_exact = test.out_of_sample_stability(prb, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
     
-    print("HEUTISTIC MODEL START...")
-    ris2 = test.out_of_sample_stability(heu, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
+    # print("HEUTISTIC MODEL START...")
+    # out_samp_heu = test.out_of_sample_stability(heu, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
 
-    plot_comparison_hist(
-        [ris1, ris2],
-        ["exact", "heuristic"],
-        ['red', 'blue'], "Out of Sample Stability",
-        "profit", "occurencies"
-    )
+    # plot_comparison_hist(
+    #     [out_samp_exact, out_samp_heu],
+    #     ["exact", "heuristic"],
+    #     ['red', 'blue'], "Out of Sample Stability",
+    #     "profit", "occurencies"
+    # )
+
+    # ##########################################################################################
+    # write results of in and out of saple analysis so you don't have to run it again
+    # ##########################################################################################
+    # rows = zip(in_samp_exact, in_samp_heu, out_samp_exact, out_samp_heu)
+
+    # with open("./results/stability.csv", "w") as f:
+    #     writer = csv.writer(f)
+    #     f.write("in_samp_exact, in_samp_heu, out_samp_exact, out_samp_heu\n")
+    #     for row in rows:
+    #         writer.writerow(row)
 
 
+    # #######################################################################
+    # ALTRO
+    # #######################################################################
     # heu = SimpleHeu(2)
     # of_heu, sol_heu, comp_time_heu = heu.solve(
     #     dict_data

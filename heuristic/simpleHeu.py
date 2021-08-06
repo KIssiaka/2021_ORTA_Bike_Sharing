@@ -92,6 +92,7 @@ class SimpleHeu():
 
         relax = np.dot(lambd,(np.array(sol)-TGS).T)
         penalty = (pen_rho/2)*(np.dot((np.array(sol)-TGS),(np.array(sol)-TGS).T))
+        #penalty = (pen_rho/2) * np.linalg.norm(np.array(sol)-TGS, 1)
        ### Objective Function
         obj_funct = dict_data["procurement_cost"] * gp.quicksum(X[i] for i in stations)
         
@@ -102,6 +103,8 @@ class SimpleHeu():
                 gp.quicksum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
             ) for i in stations
         )
+        obj_funct += relax + penalty
+
 
         #obj_funct += relax + penalty
 
@@ -176,7 +179,7 @@ class SimpleHeu():
     
 
     def solve(
-        self, instance, demand_matrix, n_scenarios,
+        self, instance, demand_matrix, n_scenarios, rho = 1, alpha=1, toll_obj_func = 1e-2
     ):
         ans = []
         of_array = []
@@ -191,7 +194,7 @@ class SimpleHeu():
         
         # tollearce for convergence
         toll_solution = 2
-        toll_obj_func = 1e-3
+        #toll_obj_func = 1e-2
 
         # max iterations
         maxiter = 100
@@ -203,10 +206,10 @@ class SimpleHeu():
         lam = np.zeros((n_scenarios, dict_data['n_stations']))
 
         # penalty: to choose appropiately
-        rho = 1
+        #rho = 1
 
         # alpha step
-        alpha = 1
+        #alpha = 1
 
         start = time.time()
         # solve the base problem for each of the solutions

@@ -4,7 +4,7 @@ import random
 random.seed(42)
 
 class Generator():
-    def __init__(self, n_scenarios = 1000, n_stations = 22):
+    def __init__(self, n_scenarios = 1000, n_stations = 22, distr = 'norm'):
         self.min_od_matrix = np.around(np.absolute(np.random.uniform(
                     0,1,
                     size=(n_stations, n_stations))
@@ -17,8 +17,18 @@ class Generator():
         self.mean_od_matrix = np.around(np.mean( np.array([ self.min_od_matrix, self.max_od_matrix ]), axis=0 ))
         self.std_od_matrix = np.around(np.std( np.array([ self.min_od_matrix, self.max_od_matrix ]), axis=0 ))
 
-        self.func_list = [self.normal_matrix(), self.uniform_matrix(), self.exponential_matrix()]
-        self.scenario_arrays = [self.func_list[random.randint(0,2)] for _ in range(n_scenarios)]
+        #self.func_list = [self.normal_matrix(), self.uniform_matrix(), self.exponential_matrix()]
+
+        if distr  == 'norm':
+            self.demand_distr = self.normal_matrix()
+        elif distr == 'uni':
+            self.demand_distr = self.uniform_matrix()
+        elif distr == 'expo':
+            self.demand_distr = self.exponential_matrix()
+        else:
+            raise ValueError("distribution must be one between 'norm', 'uni' and 'expo'")
+
+        self.scenario_arrays = [self.demand_distr for _ in range(n_scenarios)]
         self.scenario_res = np.stack(self.scenario_arrays, axis=2)
 
     def normal_matrix(self):
