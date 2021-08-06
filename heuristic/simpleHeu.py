@@ -103,10 +103,10 @@ class SimpleHeu():
                 gp.quicksum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
             ) for i in stations
         )
-        obj_funct += relax + penalty
+        obj_funct += relax
+        
+        obj_funct += penalty
 
-
-        #obj_funct += relax + penalty
 
         model.setObjective(obj_funct, GRB.MINIMIZE)
 
@@ -179,7 +179,7 @@ class SimpleHeu():
     
 
     def solve(
-        self, instance, demand_matrix, n_scenarios, rho = 1, alpha=1, toll_obj_func = 1e-2
+        self, instance, demand_matrix, n_scenarios, rho = 1, alpha=1, toll_obj_func = 1e-1
     ):
         ans = []
         of_array = []
@@ -218,6 +218,7 @@ class SimpleHeu():
             of_array.append(of)
             ans.append(np.array(sol))
         x_s_array = np.stack(ans)
+        
 
         # compute temporary global solution for first iteration
         TGS = np.average(x_s_array, axis=0).astype(int)
@@ -226,11 +227,16 @@ class SimpleHeu():
         # least square method to check for convergence
         dev_from_sol = np.sum(abs(x_s_array-TGS), axis = 0)
 
+
         mean_of = np.average(of_array, axis=0)
 
         for k in range(1, maxiter+1):
-            if all(dev_from_sol<toll_solution) or abs(prev_of-mean_of)<toll_obj_func:
-                break    
+        
+            if (x_s_array==TGS).all() or abs(prev_of-mean_of)<toll_obj_func:
+                print("WE OUT BOYS")
+                break
+            
+            print("ITERAZIONE:",k)    
             x_s_array = []
             of_array = []
             ans = []

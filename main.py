@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
 
     # Reward generation
-    n_scenarios = 1000
+    n_scenarios = 100
     """
     We create the demand matrixes by using a monte carlo distribution that chooses between:
     - exponential
@@ -85,8 +85,8 @@ if __name__ == '__main__':
 
     #for r, alpha, toll in itertools.izip(np.arange(0, 1, 0.1), np.arange(0, 1, 0.1), [10, 1, 1e-1, 1e-2, 1e-3, 1e-4]):
     
-    for r in np.arange(0, 1, 0.1):
-        print("TRYING WITH PENALTY OF: ", r)
+    for r in np.arange(1, 100, 10):
+        print("TRYING WITH RHO OF: ", r)
         of_heu, sol_heu, comp_time_heu = heu.solve(
             inst,
             demand_matrix,
@@ -94,8 +94,8 @@ if __name__ == '__main__':
             r
         )
 
-        file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
-            "heu", of_heu, sol_heu, comp_time_heu, r#, alpha, toll
+        file_output.write("{}, {}, {}, {}, {}\n".format(
+            "heu", of_heu, sol_heu, comp_time_heu, r
         ))
 
     file_output.close()
