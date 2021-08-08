@@ -13,6 +13,7 @@ from solver.sampler import Sampler
 from utility.plot_results import plot_comparison_hist
 import csv
 import itertools
+import string
 
 np.random.seed(0)
 
@@ -47,56 +48,65 @@ if __name__ == '__main__':
     """
     demand_matrix = sam.sample_stoch(
         inst,
-        n_scenarios=n_scenarios
+        n_scenarios=n_scenarios,
+        distribution='norm'
     )
-
-
-    """
-    here we compute the exact solution using the model written in the paper
-    """
-    prb = BikeSharing()
-    # of_exact, sol_exact, comp_time_exact = prb.solve(
-    #     inst,
-    #     demand_matrix,
-    #     n_scenarios,
-    #     verbose=True
-    # )
-    #print(sol_exact)
-
-    """
-    heuristic solution using the progressive hedging algorithm
-    """
-    heu = SimpleHeu()
-    # of_heu, sol_heu, comp_time_heu = heu.solve(
-    #     inst,
-    #     demand_matrix,
-    #     n_scenarios,
-    # )
-    # print(of_heu, sol_heu, comp_time_heu)
-    # print(of_exact, sol_exact, comp_time_exact)
-
+    test = Tester()
     # printing results of a file
     file_output = open(
         "./results/grid_serach_penalty.csv",
         "w"
     )
-    file_output.write("method, of, sol, time, rho\n")
+    file_output.write("method, of, time, rho, alpha, iteration, sol\n")
 
 
-    #for r, alpha, toll in itertools.izip(np.arange(0, 1, 0.1), np.arange(0, 1, 0.1), [10, 1, 1e-1, 1e-2, 1e-3, 1e-4]):
+    """
+    here we compute the exact solution using the model written in the paper
+    """
+    print("EXACT METHOD")
+    prb = BikeSharing()
+    of_exact, sol_exact, comp_time_exact = prb.solve(
+        inst,
+        demand_matrix,
+        n_scenarios,
+    )
+    file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
+        "exact", of_exact, comp_time_exact, 0, 0, 0, ' '.join(str(e) for e in sol_exact)
+    ))
+
+    """
+    heuristic solution using the progressive hedging algorithm
+    """
+    print("HEURISTIC METHOD")
+    heu = SimpleHeu()
+    # r = 1
+    # alpha = 1
+    # of_heu, sol_heu, comp_time_heu, iter = heu.solve(
+    #     inst,
+    #     demand_matrix,
+    #     n_scenarios,
+    #     r,
+    #     alpha
+    # )
+    # file_output.write("{}, {}, {}\n".format(
+    #     "heu", of_heu, comp_time_heu, r, alpha, iter, ' '.join(str(e) for e in sol_heu)
+    # ))
+
     
-    for r in np.arange(1, 100, 10):
-        print("TRYING WITH RHO OF: ", r)
-        of_heu, sol_heu, comp_time_heu = heu.solve(
-            inst,
-            demand_matrix,
-            n_scenarios,
-            r
-        )
 
-        file_output.write("{}, {}, {}, {}, {}\n".format(
-            "heu", of_heu, sol_heu, comp_time_heu, r
-        ))
+    for r in np.arange(10, 110, 30):
+        for alpha in np.arange(1, 2, 0.2):
+            print("TRYING WITH ALPHA=: ", alpha, "AND PENALTY=", r)
+            of_heu, sol_heu, comp_time_heu, iter = heu.solve(
+                inst,
+                demand_matrix,
+                n_scenarios,
+                round(r),
+                round(alpha)
+            )
+            file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
+                "heu", of_heu, comp_time_heu, r, alpha, iter, ' '.join(str(e) for e in sol_heu)
+            ))
 
     file_output.close()
 
@@ -110,6 +120,7 @@ if __name__ == '__main__':
     #     inst,
     #     n_scenarios=n_scenarios
     # )
+    # test = Tester()
 
     #prb = BikeSharing()
     # of_exact, sol_exact, comp_time_exact = prb.solve(

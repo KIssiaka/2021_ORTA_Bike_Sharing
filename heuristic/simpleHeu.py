@@ -10,7 +10,7 @@ class SimpleHeu():
     def __init__(self):
         pass
 
-    def DEP_solver(self, dict_data, scenario_input, TGS, lambd=0, pen_rho=0):
+    def DEP_solver(self, dict_data, scenario_input, TGS, lambd=0, pen_rho=0, iteration=0):
         problem_name = "DEP"
         model = gp.Model(problem_name)
         n_stations = dict_data['n_stations']
@@ -90,10 +90,9 @@ class SimpleHeu():
         model.update()
         sol = [X[i] for i in stations]
 
-        relax = np.dot(lambd,(np.array(sol)-TGS).T)
-        penalty = (pen_rho/2)*(np.dot((np.array(sol)-TGS),(np.array(sol)-TGS).T))
-        #penalty = (pen_rho/2) * np.linalg.norm(np.array(sol)-TGS, 1)
-       ### Objective Function
+        
+        
+        ## Objective Function
         obj_funct = dict_data["procurement_cost"] * gp.quicksum(X[i] for i in stations)
         
         obj_funct += gp.quicksum(
@@ -103,9 +102,13 @@ class SimpleHeu():
                 gp.quicksum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
             ) for i in stations
         )
-        obj_funct += relax
+        if iteration!= 0:
+            relax = np.dot(lambd.T,(np.array(sol)-TGS))
+            penalty = (pen_rho/2)*(np.dot((np.array(sol)-TGS),(np.array(sol)-TGS).T))
+            #penalty = (pen_rho/2) *abs(np.array(sol)-TGS)
+            obj_funct += relax
         
-        obj_funct += penalty
+            obj_funct += penalty
 
 
         model.setObjective(obj_funct, GRB.MINIMIZE)
@@ -179,22 +182,14 @@ class SimpleHeu():
     
 
     def solve(
-        self, instance, demand_matrix, n_scenarios, rho = 1, alpha=1, toll_obj_func = 1e-1
+        self, instance, scenarios, n_scenarios, rho = 1, alpha=1
     ):
         ans = []
         of_array = []
         dict_data = instance.get_data()
 
-
-
-        scenarios = demand_matrix
         # temporary global solution
         TGS = 0
-        prev_of = 0
-        
-        # tollearce for convergence
-        toll_solution = 2
-        #toll_obj_func = 1e-2
 
         # max iterations
         maxiter = 100
@@ -204,66 +199,49 @@ class SimpleHeu():
 
         #lagrangian multiplier
         lam = np.zeros((n_scenarios, dict_data['n_stations']))
-
-        # penalty: to choose appropiately
-        #rho = 1
-
-        # alpha step
-        #alpha = 1
-
         start = time.time()
         # solve the base problem for each of the solutions
         for i, s in enumerate(np.rollaxis(scenarios, 2)):
             of, sol = self.DEP_solver(dict_data, s, TGS, lam[i], rho)
             of_array.append(of)
             ans.append(np.array(sol))
-        x_s_array = np.stack(ans)
+        x_s_arrays = np.stack(ans)
         
-
+        
         # compute temporary global solution for first iteration
-        TGS = np.average(x_s_array, axis=0).astype(int)
-
-
-        # least square method to check for convergence
-        dev_from_sol = np.sum(abs(x_s_array-TGS), axis = 0)
-
-
-        mean_of = np.average(of_array, axis=0)
+        TGS = np.average(x_s_arrays, axis=0).astype(int)
+        lam = rho*(x_s_arrays - TGS)
 
         for k in range(1, maxiter+1):
-        
-            if (x_s_array==TGS).all() or abs(prev_of-mean_of)<toll_obj_func:
-                print("WE OUT BOYS")
+
+            if ( np.all(abs(x_s_arrays-TGS) <= 0.5) ):
                 break
+
             
             print("ITERAZIONE:",k)    
-            x_s_array = []
+            x_s_arrays = []
             of_array = []
             ans = []
 
             # solve monoscenario problems
             for i, s in enumerate(np.rollaxis(scenarios, 2)):
-                of, sol = self.DEP_solver(dict_data, s, TGS, lam[i], rho)
+                of, sol = self.DEP_solver(dict_data, s, TGS, lam[i], rho, k)
                 of_array.append(of)
                 ans.append(np.array(sol))
-            x_s_array = np.stack(ans)
+            x_s_arrays = np.stack(ans)
 
             # compute temporary global solution for first iteration
-            TGS = np.average(x_s_array, axis=0).astype(int)
+            TGS = np.average(x_s_arrays, axis=0).astype(int)
             
 
             # update the multipliers
-            lam = lam + rho*(x_s_array - TGS)
+            lam = lam + rho*(x_s_arrays - TGS)
             rho = alpha*rho
-            
-            # calc the deviation from the global consensus
-            dev_from_sol = np.sum(abs(x_s_array-TGS), axis = 0)
-            prev_of = mean_of
-            mean_of = np.average(of_array, axis=0)
+            print("Obj. Fun. Result = ", np.average(of_array, axis=0))
 
         end = time.time()
         comp_time = end - start
 
         sol_x = TGS
         of = np.average(of_array, axis=0)
-        return of, sol_x, comp_time
+        return of, sol_x, comp_time, k
