@@ -182,7 +182,7 @@ class SimpleHeu():
     
 
     def solve(
-        self, instance, scenarios, n_scenarios, rho = 1, alpha=1
+        self, instance, scenarios, n_scenarios, rho = 70, alpha=100
     ):
         ans = []
         of_array = []
@@ -217,8 +217,7 @@ class SimpleHeu():
             if ( np.all(abs(x_s_arrays-TGS) <= 0.5) ):
                 break
 
-            
-            print("ITERAZIONE:",k)    
+   
             x_s_arrays = []
             of_array = []
             ans = []
@@ -237,11 +236,10 @@ class SimpleHeu():
             # update the multipliers
             lam = lam + rho*(x_s_arrays - TGS)
             rho = alpha*rho
-            print("Obj. Fun. Result = ", np.average(of_array, axis=0))
 
         end = time.time()
         comp_time = end - start
 
         sol_x = TGS
         of = np.average(of_array, axis=0)
-        return of, sol_x, comp_time, k
+        return of, sol_x, comp_time

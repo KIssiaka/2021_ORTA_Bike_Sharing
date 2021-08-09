@@ -53,11 +53,11 @@ if __name__ == '__main__':
     )
     test = Tester()
     # printing results of a file
-    file_output = open(
-        "./results/grid_serach_penalty.csv",
-        "w"
-    )
-    file_output.write("method, of, time, rho, alpha, iteration, sol\n")
+    # file_output = open(
+    #     "./results/grid_serach_penalty.csv",
+    #     "w"
+    # )
+    # file_output.write("method, of, time, rho, alpha, sol\n")
 
 
     """
@@ -65,50 +65,45 @@ if __name__ == '__main__':
     """
     print("EXACT METHOD")
     prb = BikeSharing()
-    of_exact, sol_exact, comp_time_exact = prb.solve(
-        inst,
-        demand_matrix,
-        n_scenarios,
-    )
-    file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
-        "exact", of_exact, comp_time_exact, 0, 0, 0, ' '.join(str(e) for e in sol_exact)
-    ))
+    # of_exact, sol_exact, comp_time_exact = prb.solve(
+    #     inst,
+    #     demand_matrix,
+    #     n_scenarios,
+    # )
+    # file_output.write("{}, {}, {}, {}, {}, {}\n".format(
+    #     "exact", of_exact, comp_time_exact, 0, 0 ' '.join(str(e) for e in sol_exact)
+    # ))
 
     """
     heuristic solution using the progressive hedging algorithm
     """
     print("HEURISTIC METHOD")
     heu = SimpleHeu()
-    # r = 1
-    # alpha = 1
     # of_heu, sol_heu, comp_time_heu, iter = heu.solve(
     #     inst,
     #     demand_matrix,
-    #     n_scenarios,
-    #     r,
-    #     alpha
+    #     n_scenarios
     # )
-    # file_output.write("{}, {}, {}\n".format(
-    #     "heu", of_heu, comp_time_heu, r, alpha, iter, ' '.join(str(e) for e in sol_heu)
-    # ))
 
-    
+    # ########################################################
+    # SEARCH FOR GOOD VALUES OF PENALTY AND ALPHA
+    # ########################################################
 
-    for r in np.arange(10, 110, 30):
-        for alpha in np.arange(1, 2, 0.2):
-            print("TRYING WITH ALPHA=: ", alpha, "AND PENALTY=", r)
-            of_heu, sol_heu, comp_time_heu, iter = heu.solve(
-                inst,
-                demand_matrix,
-                n_scenarios,
-                round(r),
-                round(alpha)
-            )
-            file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
-                "heu", of_heu, comp_time_heu, r, alpha, iter, ' '.join(str(e) for e in sol_heu)
-            ))
+    # for r in np.arange(10, 110, 30):
+    #     for alpha in [1.1, 10, 100]:
+    #         print("TRYING WITH ALPHA=: ", alpha, "AND PENALTY=", r)
+    #         of_heu, sol_heu, comp_time_heu = heu.solve(
+    #             inst,
+    #             demand_matrix,
+    #             n_scenarios,
+    #             round(r, 1),
+    #             round(alpha, 1)
+    #         )
+    #         file_output.write("{}, {}, {}, {}, {}, {}\n".format(
+    #             "heu", of_heu, comp_time_heu, r, alpha ' '.join(str(e) for e in sol_heu)
+    #         ))
 
-    file_output.close()
+    # file_output.close()
 
     # #########################################################
     # RECOURSE PROBLEM
@@ -197,19 +192,23 @@ if __name__ == '__main__':
     This requirement guarantees that whichever scenario tree we choose, the optimal value of the objective function reported by the model itself is (approximately) the same.
     We evaluate different solutions on different generated trees and if the results are similar (distribution is gaussian), we have in sample stability
     """
-    # test = Tester()
-    # n_scenarios = 1000
-    # n_rep = 100
+    test = Tester()
+    n_scenarios = 100
+    n_rep = 100
+    print("IN SAMPLE STABILITY ANALYSIS")
     
-    # in_samp_exact = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios)
-    # in_samp_heu = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios)
+    print("EXACT MODEL START...")
+    in_samp_exact = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios)
 
-    # plot_comparison_hist(
-    #     [in_samp_exact, in_samp_heu],
-    #     ["exact", "heuristic"],
-    #     ['red', 'blue'], "In Sample Stability",
-    #     "profit", "occurencies"
-    # )
+    print("HEUTISTIC MODEL START...")
+    in_samp_heu = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios)
+
+    plot_comparison_hist(
+        [in_samp_exact, in_samp_heu],
+        ["exact", "heuristic"],
+        ['red', 'blue'], "In Sample Stability",
+        "profit", "occurencies"
+    )
 
     # ##########################################################
     # OUT OF SAMPLE STABILITY ANALYSIS
@@ -217,23 +216,23 @@ if __name__ == '__main__':
     """
     The out-of-sample stability test investigates whether a scenario generation method, with the selected sample  size,  creates  scenario  trees  that  provide  optimal  solutions  that  give  approximately  the  same optimal value as when using the true probability distribution.
     """
-    # n_scenarios_first = 500
-    # n_scenarios_second = 500
-    # n_rep = 100
-    # print("OUT OF SAMPLE STABILITY ANALYSIS")
+    n_scenarios_first = 100
+    n_scenarios_second = 100
+    n_rep = 100
+    print("OUT OF SAMPLE STABILITY ANALYSIS")
     
-    # print("EXACT MODEL START...")
-    # out_samp_exact = test.out_of_sample_stability(prb, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
+    print("EXACT MODEL START...")
+    out_samp_exact = test.out_of_sample_stability(prb, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
     
-    # print("HEUTISTIC MODEL START...")
-    # out_samp_heu = test.out_of_sample_stability(heu, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
+    print("HEUTISTIC MODEL START...")
+    out_samp_heu = test.out_of_sample_stability(heu, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
 
-    # plot_comparison_hist(
-    #     [out_samp_exact, out_samp_heu],
-    #     ["exact", "heuristic"],
-    #     ['red', 'blue'], "Out of Sample Stability",
-    #     "profit", "occurencies"
-    # )
+    plot_comparison_hist(
+        [out_samp_exact, out_samp_heu],
+        ["exact", "heuristic"],
+        ['red', 'blue'], "Out of Sample Stability",
+        "profit", "occurencies"
+    )
 
     # ##########################################################################################
     # write results of in and out of saple analysis so you don't have to run it again
