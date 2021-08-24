@@ -17,7 +17,7 @@ class Generator():
         self.mean_od_matrix = np.around(np.mean( np.array([ self.min_od_matrix, self.max_od_matrix ]), axis=0 ))
         self.std_od_matrix = np.around(np.std( np.array([ self.min_od_matrix, self.max_od_matrix ]), axis=0 ))
 
-        #self.func_list = [self.normal_matrix(), self.uniform_matrix(), self.exponential_matrix()]
+        self.func_list = [self.normal_matrix(), self.uniform_matrix(), self.exponential_matrix()]
 
         if distr  == 'norm':
             self.scenario_arrays = [self.normal_matrix() for _ in range(n_scenarios)]
@@ -25,10 +25,12 @@ class Generator():
             self.scenario_arrays = [self.uniform_matrix() for _ in range(n_scenarios)]
         elif distr == 'expo':
             self.scenario_arrays = [self.exponential_matrix() for _ in range(n_scenarios)]
+        elif distr == 'monte_carlo':
+            self.scenario_arrays = [self.func_list[random.randint(0,2)] for _ in range(n_scenarios)]
         else:
-            raise ValueError("distribution must be one between 'norm', 'uni' and 'expo'")
+            raise ValueError("distribution must be one between 'norm', 'uni' and 'expo' or 'monte_carlo'")
 
-        #self.scenario_arrays = [self.demand_distr for _ in range(n_scenarios)]
+        
         self.scenario_res = np.stack(self.scenario_arrays, axis=2)
 
     def normal_matrix(self):
