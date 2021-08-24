@@ -6,7 +6,7 @@ import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
 
-class SimpleHeu():
+class ProgressiveHedging():
     def __init__(self):
         pass
 
@@ -90,8 +90,7 @@ class SimpleHeu():
         model.update()
         sol = [X[i] for i in stations]
 
-        
-        
+
         ## Objective Function
         obj_funct = dict_data["procurement_cost"] * gp.quicksum(X[i] for i in stations)
         
@@ -105,7 +104,7 @@ class SimpleHeu():
         if iteration!= 0:
             relax = np.dot(lambd.T,(np.array(sol)-TGS))
             penalty = (pen_rho/2)*(np.dot((np.array(sol)-TGS),(np.array(sol)-TGS).T))
-            #penalty = (pen_rho/2) *abs(np.array(sol)-TGS)
+            # penalty = (pen_rho/2) *np.linalg.norm(np.array(sol)-TGS)
             obj_funct += relax
         
             obj_funct += penalty
@@ -244,4 +243,4 @@ class SimpleHeu():
 
         sol_x = TGS
         of = np.average(of_array, axis=0)
-        return of, sol_x, comp_time
+        return of, sol_x, comp_time, k

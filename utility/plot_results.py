@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import numpy as np
+# import numpy as np
 from matplotlib import pyplot
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 def plot_comparison_hist(values, labels, colors, title, x_label, y_label):
