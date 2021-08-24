@@ -109,7 +109,7 @@ if __name__ == '__main__':
     # RECOURSE PROBLEM
     # #########################################################
     """
-    Here we make a first stage decision and then and then, we solve the second stage solutions and average those in orrder to understand the profit for each of the scenarios based on the first assumption and the demand. 
+    Here we make a first stage decision and then, we solve the second stage solutions and average those in order to understand the profit for each of the scenarios based on the first assumption and the demand. 
     """
     # demand_RP = sam.sample_stoch(
     #     inst,
@@ -194,13 +194,13 @@ if __name__ == '__main__':
     """
     test = Tester()
     n_scenarios = 100
-    n_rep = 100
+    n_rep = 5
     print("IN SAMPLE STABILITY ANALYSIS")
     
     print("EXACT MODEL START...")
     in_samp_exact = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios)
 
-    print("HEUTISTIC MODEL START...")
+    print("HEURISTIC MODEL START...")
     in_samp_heu = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios)
 
     plot_comparison_hist(
@@ -218,13 +218,13 @@ if __name__ == '__main__':
     """
     n_scenarios_first = 100
     n_scenarios_second = 100
-    n_rep = 100
+    n_rep = 5
     print("OUT OF SAMPLE STABILITY ANALYSIS")
     
     print("EXACT MODEL START...")
     out_samp_exact = test.out_of_sample_stability(prb, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
     
-    print("HEUTISTIC MODEL START...")
+    print("HEURISTIC MODEL START...")
     out_samp_heu = test.out_of_sample_stability(heu, sam, inst, n_rep, n_scenarios_first, n_scenarios_second)
 
     plot_comparison_hist(

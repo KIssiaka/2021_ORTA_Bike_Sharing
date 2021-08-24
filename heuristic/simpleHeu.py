@@ -188,7 +188,7 @@ class SimpleHeu():
         of_array = []
         dict_data = instance.get_data()
 
-        # temporary global solution
+        # temporary global solution (initialize the TGS for the first iteration)
         TGS = 0
 
         # max iterations
@@ -200,7 +200,9 @@ class SimpleHeu():
         #lagrangian multiplier
         lam = np.zeros((n_scenarios, dict_data['n_stations']))
         start = time.time()
-        # solve the base problem for each of the solutions
+        # solve the base problem for each of the solutions 
+        # (solve the problem for the first time in order to initialize the first stage solution at the zero-th iteration)
+        # For each scenario, solve the mono-scenario problem
         for i, s in enumerate(np.rollaxis(scenarios, 2)):
             of, sol = self.DEP_solver(dict_data, s, TGS, lam[i], rho)
             of_array.append(of)
@@ -214,7 +216,7 @@ class SimpleHeu():
 
         for k in range(1, maxiter+1):
 
-            if ( np.all(abs(x_s_arrays-TGS) <= 0.5) ):
+            if ( np.all(abs(x_s_arrays-TGS) == 0) ):
                 break
 
    
