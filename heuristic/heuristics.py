@@ -243,4 +243,4 @@ class ProgressiveHedging():
 
         sol_x = TGS
         of = np.average(of_array, axis=0)
-        return of, sol_x, comp_time, k
+        return of, sol_x, comp_time

@@ -55,7 +55,7 @@ if __name__ == '__main__':
     help_str = 'main.py -n <n_scenarios> -d <distribution>'
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], "hn:d", ["n_scenarios=", "distribution="])
+            sys.argv[1:], "hn:d:", ["n_scenarios=", "distribution="])
     except getopt.GetoptError:
         print(help_str)
         sys.exit(2)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             print(help_str)
             sys.exit()
         elif opt in ("-n", "--n_scenarios"):
-            n_scenarios = arg
+            n_scenarios = int(arg)
         elif opt in ("-d", "--distribution"):
             if (arg in ("norm", "uni", "expo", "monte_carlo")):
                 distribution = arg
@@ -137,12 +137,12 @@ if __name__ == '__main__':
             "./results/search_penalty_alpha.csv",
             "w"
         )
-        file_output.write("method, of, time, rho, alpha, iterations sol\n")
+        file_output.write("method, of, time, rho, alpha, sol\n")
         heu = ProgressiveHedging()
         for r in np.arange(10, 110, 30):
             for alpha in [1.1, 10, 100]:
                 print("TRYING WITH ALPHA=: ", alpha, "AND PENALTY=", r)
-                of_heu, sol_heu, comp_time_heu, num_iters = heu.solve(
+                of_heu, sol_heu, comp_time_heu = heu.solve(
                     inst,
                     demand_matrix,
                     n_scenarios,
@@ -150,7 +150,7 @@ if __name__ == '__main__':
                     round(alpha, 1)
                 )
                 file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
-                    "heu", of_heu, comp_time_heu, r, alpha, num_iters, ' '.join(str(e) for e in sol_heu)
+                    "heu", of_heu, comp_time_heu, r, alpha, ' '.join(str(e) for e in sol_heu)
                 ))
 
         file_output.close()
