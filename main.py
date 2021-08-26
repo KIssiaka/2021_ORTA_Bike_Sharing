@@ -346,10 +346,10 @@ if __name__ == '__main__':
             elif (option == "test_out_sample"):
                 inp = input("Choose the number of Scenario Trees you want to build\n")
                 test_out_sample(n_rep=int(inp))
-            elif (option == "exit"):
-                break
             elif (option == "opt_scenarios"):
                 optimum_num_scenarios()
+            elif (option == "exit"):
+                break
             else:
                 print("Unsupported operation, please check the command")
         except KeyboardInterrupt:
