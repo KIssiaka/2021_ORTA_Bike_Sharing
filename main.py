@@ -78,13 +78,6 @@ if __name__ == '__main__':
         distribution=distribution
     )
     
-    # printing results of a file
-    # file_output = open(
-    #     "./results/grid_serach_penalty.csv",
-    #     "w"
-    # )
-    # file_output.write("method, of, time, rho, alpha, sol\n")
-    
     def solve_exact():
         """
         here we compute the exact solution using the model written in the paper
@@ -257,10 +250,10 @@ if __name__ == '__main__':
         print("IN SAMPLE STABILITY ANALYSIS")
         
         print("EXACT MODEL START...")
-        in_samp_exact = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios)
+        in_samp_exact = test.in_sample_stability(prb, sam, inst, n_rep, n_scenarios, distribution)
 
         print("HEURISTIC MODEL START...")
-        in_samp_heu = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios)
+        in_samp_heu = test.in_sample_stability(heu, sam, inst, n_rep, n_scenarios, distribution)
 
         plot_comparison_hist(
             [in_samp_exact, in_samp_heu],
@@ -307,10 +300,38 @@ if __name__ == '__main__':
             f.write("out_samp_exact, out_samp_heu\n")
             for row in rows:
                 writer.writerow(row)
+
+    def optimum_num_scenarios():
+        test = Tester()
+        prb = BikeSharing()
+        sam = Sampler()
+        ins = Instance(sim_setting)
+        n_rep = 15 #number of times we solve the problem
+        obj_values_distr = []
+        distributions = ["norm","uni","expo"]
+        for distr in distributions:
+            obj_values = []
+            for i in range(100,1001,100):
+                obj_values.append(np.mean(test.in_sample_stability(prb, sam, ins, n_rep, i,distr)))
+            obj_values_distr.append(obj_values)
+        with open("./results/optimum_num_scenarios.csv", "w") as f:
+            writer = csv.writer(f)
+            f.write("distribution,100,200,300,400,500,600,700,800,900,1000")
+            for i, val in enumerate(obj_values_distr):
+                writer.writerow([distributions[i]]+val)    
+            f.close()
+
+        for val in obj_values_distr:
+            plt.plot(range(100,1001,100),val)
+        plt.legend(distributions)
+        plt.xlabel("Cardinality of the scenario tree")
+        plt.ylabel("Objective function value")
+        plt.xticks(range(100,1001,100))
+        plt.show()
     
     while True:
         try:
-            option = input("What do you want to do? (Options: solve_exact, solve_heu, search_penalty_alpha, vss_evpi, test_in_sample, test_out_sample or exit\n")
+            option = input("What do you want to do? (Options: solve_exact, solve_heu, search_penalty_alpha, vss_evpi, test_in_sample, test_out_sample, opt_scenarios or exit)\n")
             if (option == "solve_exact"):
                 solve_exact()
             elif (option == "solve_heu"):
@@ -327,6 +348,8 @@ if __name__ == '__main__':
                 test_out_sample(n_rep=int(inp))
             elif (option == "exit"):
                 break
+            elif (option == "opt_scenarios"):
+                optimum_num_scenarios()
             else:
                 print("Unsupported operation, please check the command")
         except KeyboardInterrupt:

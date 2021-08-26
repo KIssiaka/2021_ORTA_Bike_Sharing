@@ -346,14 +346,15 @@ class Tester():
 
 
 
-    def in_sample_stability(self, problem, sampler, instance, n_repertions, n_scenarios_sol):
-        ans = [0] * n_repertions
-        for i in range(n_repertions):
+    def in_sample_stability(self, problem, sampler, instance, n_repetitions, n_scenarios_sol, distribution):
+        ans = [0] * n_repetitions
+        for i in range(n_repetitions):
             print("Scenario Tree: ", i)
             a = time.time()
             reward = sampler.sample_stoch(
                 instance,
-                n_scenarios=n_scenarios_sol
+                n_scenarios=n_scenarios_sol,
+                distribution=distribution
             )
             of, sol, comp_time = problem.solve(
                 instance,
@@ -365,9 +366,9 @@ class Tester():
             ans[i] = of
         return ans
     
-    def out_of_sample_stability(self, problem, sampler, instance, n_repertions, n_scenarios_sol, n_scenarios_out):
-        ans = [0] * n_repertions
-        for i in range(n_repertions):
+    def out_of_sample_stability(self, problem, sampler, instance, n_repetitions, n_scenarios_sol, n_scenarios_out):
+        ans = [0] * n_repetitions
+        for i in range(n_repetitions):
             print("Scenario Tree: ", i)
             a = time.time()
             reward= sampler.sample_stoch(
