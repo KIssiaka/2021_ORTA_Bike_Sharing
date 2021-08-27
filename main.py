@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
 
     # Reward generation
-    n_scenarios = 100
+    n_scenarios = 500
     """
     We create the demand matrixes by using a monte carlo distribution that chooses between:
     - exponential
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     # ##########################################################
     # IN SAMPLE STABILITY ANALYSIS
     # ##########################################################
-    def test_in_sample(n_scenarios=100, n_rep=100):
+    def test_in_sample(n_scenarios=500, n_rep=20):
         """
         Here we analyize the in sample stability for our scenario tree generation.
         This requirement guarantees that whichever scenario tree we choose, the optimal value of the objective function reported by the model itself is (approximately) the same.
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     # ##########################################################
     # OUT OF SAMPLE STABILITY ANALYSIS
     # ##########################################################
-    def test_out_sample(n_scenarios_first = 100, n_scenarios_second = 100, n_rep = 100):
+    def test_out_sample(n_scenarios_first = 500, n_scenarios_second = 500, n_rep = 20):
         """
         The out-of-sample stability test investigates whether a scenario generation method, with the selected sample  size,  creates  scenario  trees  that  provide  optimal  solutions  that  give  approximately  the  same optimal value as when using the true probability distribution.
         """
