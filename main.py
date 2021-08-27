@@ -300,8 +300,23 @@ if __name__ == '__main__':
             f.write("out_samp_exact, out_samp_heu\n")
             for row in rows:
                 writer.writerow(row)
-
+    # ##########################################################
+    # FIND THE OPTIMUM NUMBER OF SCENARIOS
+    # ##########################################################
     def optimum_num_scenarios():
+        """
+        Method to find the optimum number of scenarios. 
+        The in-sample analysis is performed for an increasing cardinality of Scenario Trees 
+        and for 3 different distributions: Exponential, Uniform and Normal.
+        
+        Results are then saved in a csv to plot easly them and see where the 
+        objective function value is pretty constant.
+
+        Returns
+        -------
+        None.
+
+        """
         test = Tester()
         prb = BikeSharing()
         sam = Sampler()
@@ -328,6 +343,11 @@ if __name__ == '__main__':
         plt.ylabel("Objective function value")
         plt.xticks(range(100,1001,100))
         plt.show()
+        
+        
+    # ##########################################################
+    # MENU'
+    # ##########################################################    
     
     while True:
         try:
