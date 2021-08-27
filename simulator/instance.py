@@ -34,7 +34,7 @@ class Instance():
         logging.info(f"procurement_costs: {self.procurement_cost}")
         logging.info(f"stock_out_costs: {self.stock_out_cost}")
         logging.info(f"time_waste_cost: {self.time_waste_cost}")
-        logging.info(f"Trasnshipent_cost: {self.trans_ship_cost}")
+        logging.info(f"Transshipment_cost: {self.trans_ship_cost}")
         logging.info(f"stations_capacity: {self.stations_cap}")
         logging.info("simulation end")
 
