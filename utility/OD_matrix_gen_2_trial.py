@@ -19,15 +19,15 @@ class Generator():
     """
     def __init__(self, n_scenarios = 1000, n_stations = 22, distr = 'norm'):
         self.min_od_matrix = np.around(np.absolute(np.random.uniform(
-                    0,3,
+                    0,0,
                     size=(n_stations, n_stations))
                 ))
         self.max_od_matrix = np.around(np.absolute(np.random.uniform(
-                    10, 15,
+                    10, 10,
                     size=(n_stations, n_stations))
                 ))
 
-        self.scenarios = [np.around(np.random.uniform(self.min_od_matrix, self.max_od_matrix)) for i in range(n_scenarios)]
+        self.scenarios = [np.around(np.random.uniform(self.min_od_matrix, self.max_od_matrix)) for _ in range(n_scenarios)]
         self.scenarios = np.array(self.scenarios)
         
         self.mean_od_matrix = np.around(np.mean(self.scenarios, axis=0))

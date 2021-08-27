@@ -150,16 +150,19 @@ if __name__ == '__main__':
 
     
     def vss_evpi():
-        """Method to compute the Value Of The Stochastic Solution (VSS) and Expected value of perfect information (EVPI). 
-        Here the Recourse Problem (RP) and the Expected Value Problem (EVV) are solved to compute the VSS as: VSS = EVV-RP
-        as well as the Wait and See Problem (WS) is solved to compute the EVPI as EVPI = WS-RP.
+        """Method to compute the Value Of The Stochastic Solution (VSS) and Expected value of 
+        perfect information (EVPI). Here the Recourse Problem (RP) and the Expected Value Problem (EVV)
+         are solved to compute the VSS as: VSS = EVV-RP as well as the Wait and See Problem (WS) is 
+         solved to compute the EVPI as EVPI = WS-RP.
         """
         
         # #########################################################
         # RECOURSE PROBLEM
         # #########################################################
         """
-        Here we make a first stage decision and then, we solve the second stage solutions and average those in order to understand the profit for each of the scenarios based on the first assumption and the demand. 
+        Here we make a first stage decision and then we solve the second stage solutions and average 
+        those in order to understand the profit for each of the scenarios based on the first assumption
+        and the demand. 
         """
         demand_RP = sam.sample_stoch(
             inst,
@@ -169,7 +172,7 @@ if __name__ == '__main__':
 
         prb = BikeSharing()
         of_exact, sol_exact, comp_time_exact = prb.solve(
-            dict_data,
+            inst,
             demand_matrix,
             n_scenarios,
             verbose=True
@@ -189,12 +192,20 @@ if __name__ == '__main__':
         # EXPECTED VALUE PROBLEM and the VALUE OF THE STOCHASTIC SOLUTION
         # #########################################################
         """
-        The Scenarios are all blend together and only the average of them is considered. The resulting solution is clearly suboptimal but allows us to understand what is the actual loss in not considering stochasticity at all.
+        The Scenarios are all blend together and only the average of them is considered.
+        The resulting solution is clearly suboptimal but allows us to understand how 
+        much we can gain from the fact that we consider the stochasticity with respect
+        to not considering it at all and so, just considering the Exected Value of the demand.
         """
+
+        EV_demand_matrix = sam.sample_ev(
+            inst,
+            n_scenarios=n_scenarios
+        )
+
         of_EV, sol_EV, comp_time_EV = prb.solve_EV(
-            dict_data,
-            demand_matrix,
-            n_scenarios,
+            inst,
+            EV_demand_matrix,
             verbose=True
         )
 
@@ -220,8 +231,10 @@ if __name__ == '__main__':
         # WAIT AND SEE and the EXPECTED VALUE OF PERFECT INFORMATION
         # ##########################################################
         """
-        Considering each of the scenarios separately and solving the first stage problems with full knowledge of the scenario is going to unfold. 
-        This is useful to understand what is the actual value of "knowing the future" and being able to adapt the first stage variables to the possible demand. 
+        Considering each of the scenarios separately and solving the first stage problems
+        with full knowledge of the scenario is going to unfold. This is useful to understand
+        what is the actual value of "knowing the future" and being able to adapt the first 
+        stage variables to the possible demand. 
         """
         WS_demand = sam.sample_stoch(
             inst,
@@ -240,9 +253,11 @@ if __name__ == '__main__':
     # ##########################################################
     def test_in_sample(n_scenarios=500, n_rep=20):
         """
-        Here we analyize the in sample stability for our scenario tree generation.
-        This requirement guarantees that whichever scenario tree we choose, the optimal value of the objective function reported by the model itself is (approximately) the same.
-        We evaluate different solutions on different generated trees and if the results are similar (distribution is gaussian), we have in sample stability
+        Here we analyze the in sample stability for our scenario tree generation.
+        This requirement guarantees that whichever scenario tree we choose, the optimal
+        value of the objective function reported by the model itself is (approximately) 
+        the same. We evaluate different solutions on different generated trees and if 
+        the results are similar, we have in sample stability.
         """
         test = Tester()
         prb = BikeSharing()
@@ -274,7 +289,9 @@ if __name__ == '__main__':
     # ##########################################################
     def test_out_sample(n_scenarios_first = 500, n_scenarios_second = 500, n_rep = 20):
         """
-        The out-of-sample stability test investigates whether a scenario generation method, with the selected sample  size,  creates  scenario  trees  that  provide  optimal  solutions  that  give  approximately  the  same optimal value as when using the true probability distribution.
+        The out-of-sample stability test investigates whether a scenario generation method,
+        with the selected sample size, creates scenario trees that provide optimal solutions 
+        that give approximately the same optimal value as when using the true probability distribution.
         """
         test = Tester()
         prb = BikeSharing()
