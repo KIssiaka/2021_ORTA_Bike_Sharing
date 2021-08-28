@@ -2,7 +2,7 @@
 import logging
 import numpy as np
 
-
+np.random.seed(42)
 class Instance():
     def __init__(self, sim_setting):
 

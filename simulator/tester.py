@@ -356,7 +356,7 @@ class Tester():
                 n_scenarios=n_scenarios_sol,
                 distribution=distribution
             )
-            of, sol, comp_time = problem.solve(
+            of, sol, comp_time, ite = problem.solve(
                 instance,
                 reward,
                 n_scenarios_sol
@@ -375,7 +375,7 @@ class Tester():
                 instance,
                 n_scenarios=n_scenarios_sol
             )
-            of, sol, comp_time = problem.solve(
+            of, sol, comp_time, ite = problem.solve(
                 instance,
                 reward,
                 n_scenarios_sol

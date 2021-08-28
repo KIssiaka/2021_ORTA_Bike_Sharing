@@ -89,7 +89,7 @@ if __name__ == '__main__':
         )
         file_output.write("method, of, time, sol\n")
         prb = BikeSharing()
-        of_exact, sol_exact, comp_time_exact = prb.solve(
+        of_exact, sol_exact, comp_time_exact, _ = prb.solve(
             inst,
             demand_matrix,
             n_scenarios,
@@ -109,15 +109,15 @@ if __name__ == '__main__':
             "./results/heu_method.csv",
             "w"
         )
-        file_output.write("method, of, time, sol\n")
+        file_output.write("method, of, time, iterations, sol\n")
         heu = ProgressiveHedging()
-        of_heu, sol_heu, comp_time_heu = heu.solve(
+        of_heu, sol_heu, comp_time_heu, ite = heu.solve(
             inst,
             demand_matrix,
             n_scenarios
         )
-        file_output.write("{}, {}, {}, {}\n".format(
-            "heu", of_heu, comp_time_heu, ' '.join(str(e) for e in sol_heu)
+        file_output.write("{}, {}, {}, {}, {}\n".format(
+            "heu", of_heu, comp_time_heu, ite, ' '.join(str(e) for e in sol_heu)
         ))
         print("To see results, open the file: /results/heu_method.csv")
 
@@ -130,12 +130,12 @@ if __name__ == '__main__':
             "./results/search_penalty_alpha.csv",
             "w"
         )
-        file_output.write("method, of, time, rho, alpha, sol\n")
+        file_output.write("method, of, time, rho, alpha, iterations, sol\n")
         heu = ProgressiveHedging()
         for r in np.arange(10, 110, 30):
             for alpha in [1.1, 10, 100]:
                 print("TRYING WITH ALPHA=: ", alpha, "AND PENALTY=", r)
-                of_heu, sol_heu, comp_time_heu = heu.solve(
+                of_heu, sol_heu, comp_time_heu, ite = heu.solve(
                     inst,
                     demand_matrix,
                     n_scenarios,
@@ -143,10 +143,11 @@ if __name__ == '__main__':
                     round(alpha, 1)
                 )
                 file_output.write("{}, {}, {}, {}, {}, {}, {}\n".format(
-                    "heu", of_heu, comp_time_heu, r, alpha, ' '.join(str(e) for e in sol_heu)
+                    "heu", of_heu, comp_time_heu, r, alpha, ite, ' '.join(str(e) for e in sol_heu)
                 ))
 
         file_output.close()
+        print("To see results, open the file: /results/search_penalty_alpha.csv")
 
     
     def vss_evpi():
@@ -171,7 +172,7 @@ if __name__ == '__main__':
         test = Tester()
 
         prb = BikeSharing()
-        of_exact, sol_exact, comp_time_exact = prb.solve(
+        of_exact, sol_exact, comp_time_exact, _ = prb.solve(
             inst,
             demand_matrix,
             n_scenarios,
@@ -336,15 +337,14 @@ if __name__ == '__main__':
         """
         test = Tester()
         prb = BikeSharing()
-        sam = Sampler()
-        ins = Instance(sim_setting)
+
         n_rep = 15 #number of times we solve the problem
         obj_values_distr = []
         distributions = ["norm","uni","expo"]
         for distr in distributions:
             obj_values = []
             for i in range(100,1001,100):
-                obj_values.append(np.mean(test.in_sample_stability(prb, sam, ins, n_rep, i,distr)))
+                obj_values.append(np.mean(test.in_sample_stability(prb, sam, inst, n_rep, i,distr)))
             obj_values_distr.append(obj_values)
         with open("./results/optimum_num_scenarios.csv", "w") as f:
             writer = csv.writer(f)

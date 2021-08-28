@@ -19,11 +19,11 @@ class Generator():
     """
     def __init__(self, n_scenarios = 1000, n_stations = 22, distr = 'norm'):
         self.min_od_matrix = np.around(np.absolute(np.random.uniform(
-                    0,0,
+                    0,3,
                     size=(n_stations, n_stations))
                 ))
         self.max_od_matrix = np.around(np.absolute(np.random.uniform(
-                    10, 10,
+                    10, 15,
                     size=(n_stations, n_stations))
                 ))
 
@@ -50,3 +50,7 @@ class Generator():
     def exponential_matrix(self):
         return np.around(np.random.exponential(self.mean_od_matrix))
 
+if __name__=="__main__":
+    gen = Generator(500,22)
+    print(gen.min_od_matrix)
+    print(gen.max_od_matrix)
