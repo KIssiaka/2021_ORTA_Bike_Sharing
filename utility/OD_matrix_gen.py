@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-random.seed(42)
+
 
 class Generator():
     def __init__(self, n_scenarios = 1000, n_stations = 22, distr = 'norm'):
@@ -10,7 +10,7 @@ class Generator():
                     size=(n_stations, n_stations))
                 ))
         self.max_od_matrix = np.around(np.absolute(np.random.uniform(
-                    10, 15,
+                    3, 10,
                     size=(n_stations, n_stations))
                 ))
 

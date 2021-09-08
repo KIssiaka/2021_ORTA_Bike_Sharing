@@ -7,7 +7,7 @@ Created on Thu Aug 26 17:06:09 2021
 import numpy as np
 import random
 
-random.seed(42)
+
 
 class Generator():
     """This Generator class is used to build "n_scenarios" OD matrices by generating:
@@ -23,7 +23,7 @@ class Generator():
                     size=(n_stations, n_stations))
                 ))
         self.max_od_matrix = np.around(np.absolute(np.random.uniform(
-                    10, 15,
+                    3, 10,
                     size=(n_stations, n_stations))
                 ))
 
