@@ -3,7 +3,7 @@
 	"stock_out_cost": 4,
 	"time_waste_cost": 8,
 	"trans_ship_cost": 1,
-	"station_max_cap": 100,
-    "station_min_cap": 100,
+	"station_max_cap": 30,
+    "station_min_cap": 5,
     "n_stations": 22
 }
