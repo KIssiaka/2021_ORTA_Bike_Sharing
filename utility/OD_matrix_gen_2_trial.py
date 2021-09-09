@@ -27,6 +27,16 @@ class Generator():
                     size=(n_stations, n_stations))
                 ))
 
+        self.prob_matrix = np.zeros((n_stations, n_stations))
+
+        for i in range(n_stations):
+            for j in range(n_stations):
+                if i != j:
+                    self.prob_matrix[i, j] = i + j
+                    self.prob_matrix[i, j] = 1 - (
+                        self.prob_matrix[i, j] / ((n_stations - 1) * 2)
+                    )
+
         self.scenarios = [np.around(np.random.uniform(self.min_od_matrix, self.max_od_matrix)) for _ in range(n_scenarios)]
         self.scenarios = np.array(self.scenarios)
         
@@ -42,14 +52,17 @@ class Generator():
         self.scenario_res = np.stack(self.scenario_arrays, axis=2)
 
     def normal_matrix(self):
-        return np.around(np.absolute(np.random.normal(self.mean_od_matrix, self.std_od_matrix )))
-
+        return np.floor(
+            self.prob_matrix * np.around(np.absolute(np.random.normal(self.mean_od_matrix, self.std_od_matrix )))
+        )
     def uniform_matrix(self):
-        return np.around(np.random.uniform(self.min_od_matrix, self.max_od_matrix))
-
+        return np.floor(
+            self.prob_matrix *  np.around(np.random.uniform(self.min_od_matrix, self.max_od_matrix))
+        )
     def exponential_matrix(self):
-        return np.around(np.random.exponential(self.mean_od_matrix))
-
+        return np.floor(
+            self.prob_matrix * np.around(np.random.exponential(self.mean_od_matrix))
+        )
 if __name__=="__main__":
     gen = Generator(500,22)
     print(gen.min_od_matrix)

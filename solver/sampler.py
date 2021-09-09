@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import utility.OD_matrix_realistic as gen
+import utility.OD_matrix_gen_2_trial as gen
 
 class Sampler:
     def __init__(self):

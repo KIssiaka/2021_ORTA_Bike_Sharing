@@ -114,6 +114,12 @@ class ProgressiveHedging():
 
 
         ### Costraints
+
+        for i in stations:
+            model.addConstr(
+                X[i] <= dict_data['station_cap'][i],
+                f"station_bike_limit"
+            )
             
         for i in stations:
             for j in stations:
