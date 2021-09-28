@@ -21,19 +21,19 @@ class Generator:
                     self.prob_matrix[i, j] = 1 - (
                         self.prob_matrix[i, j] / ((n_stations - 1) * 2)
                     )
+        self.hystory = [np.around(np.random.uniform(self.min_od_matrix, self.max_od_matrix)) for _ in range(1095)]#1095=3years
+        self.hystory = np.array(self.hystory)
 
-        self.mean_od_matrix = np.around(
-            np.mean(np.array([self.min_od_matrix, self.max_od_matrix]), axis=0)
-        )
-        self.std_od_matrix = np.around(
-            np.std(np.array([self.min_od_matrix, self.max_od_matrix]), axis=0)
-        )
+        # mean equal for all distributions: uniform, exponential and normal
+        self.mean_od_matrix = np.around(np.mean(np.array(self.hystory), axis=0))
 
-        self.func_list = [
-            self.normal_matrix(),
-            self.uniform_matrix(),
-            self.exponential_matrix(),
-        ]
+        #std for normal
+        self.std_od_matrix_norm = np.around(np.std(np.array(self.hystory), axis=0))
+
+        #std for exponential
+        self.std_od_matrix_expo = self.mean_od_matrix
+
+        
 
         if distr == "norm":
             self.scenario_arrays = [self.normal_matrix() for _ in range(n_scenarios)]
@@ -43,13 +43,9 @@ class Generator:
             self.scenario_arrays = [
                 self.exponential_matrix() for _ in range(n_scenarios)
             ]
-        elif distr == "monte_carlo":
-            self.scenario_arrays = [
-                self.func_list[random.randint(0, 2)] for _ in range(n_scenarios)
-            ]
         else:
             raise ValueError(
-                "distribution must be one between 'norm', 'uni' and 'expo' or 'monte_carlo'"
+                "distribution must be one between 'norm', 'uni' and 'expo'"
             )
 
         self.scenario_res = np.stack(self.scenario_arrays, axis=2)
@@ -57,11 +53,8 @@ class Generator:
     def normal_matrix(self):
 
         return np.floor(
-            self.prob_matrix * np.around( np.absolute(np.random.normal(self.mean_od_matrix, self.std_od_matrix)))
+            self.prob_matrix * np.around( np.absolute(np.random.normal(self.mean_od_matrix, self.std_od_matrix_norm)))
         )
-        # return np.around(
-        #     np.absolute(np.random.normal(self.mean_od_matrix, self.std_od_matrix))
-        # )
 
     def uniform_matrix(self):
         return np.floor(
@@ -69,5 +62,10 @@ class Generator:
         )
 
     def exponential_matrix(self):
-        return np.floor( self.prob_matrix * np.around(np.random.exponential(self.mean_od_matrix))
+        return np.floor( self.prob_matrix * np.around(np.random.exponential(self.std_od_matrix_expo))
         )
+
+if __name__=="__main__":
+    gen = Generator(500,22)
+    
+    
