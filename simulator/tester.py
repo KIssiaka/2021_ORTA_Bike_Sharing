@@ -190,7 +190,6 @@ class Tester():
     ):
         ans = []
         dict_data = inst.get_data()
-        obj_fs = 0
         n_stations = inst.n_stations
         stations = range(n_stations)
         
@@ -286,6 +285,12 @@ class Tester():
             ### Costraints
             
             for i in stations:
+                model.addConstr(
+                    X[i] <= dict_data['station_cap'][i],
+                    f"station_bike_limit"
+                )
+
+            for i in stations:
                 for j in stations:
                     model.addConstr(
                         beta[i, j] == demand_matrix[i, j, s] - I_minus[i, j],
@@ -339,7 +344,7 @@ class Tester():
             model.setParam('OutputFlag', 0)
             model.setParam('LogFile', './logs/gurobi.log')
             model.optimize()
-            ans.append(obj_fs + model.getObjective().getValue())
+            ans.append(model.getObjective().getValue())
 
         WS = np.average(ans)
         return ans, WS

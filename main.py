@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from matplotlib import rc_params
 import numpy as np
 import matplotlib.pyplot as plt
 from simulator.instance import Instance
@@ -12,12 +11,10 @@ from heuristic.heuristics import ProgressiveHedging
 from solver.sampler import Sampler
 from utility.plot_results import plot_comparison_hist
 import csv
-import itertools
-import string
 import sys
 import getopt
 
-np.random.seed(0)  
+np.random.seed(5)  
 
 if __name__ == '__main__':
     log_name = "./logs/main.log"
@@ -66,10 +63,10 @@ if __name__ == '__main__':
         elif opt in ("-n", "--n_scenarios"):
             n_scenarios = int(arg)
         elif opt in ("-d", "--distribution"):
-            if (arg in ("norm", "uni", "expo", "monte_carlo")):
+            if (arg in ("norm", "uni", "expo")):
                 distribution = arg
             else:
-                print("Choose a distribution among norm, uni, expo and monte_carlo")
+                print("Choose a distribution among norm, uni and expo")
                 sys.exit()
 
     demand_matrix = sam.sample_stoch(
@@ -154,20 +151,20 @@ if __name__ == '__main__':
         """Method to compute the Value Of The Stochastic Solution (VSS) and Expected value of 
         perfect information (EVPI). Here the Recourse Problem (RP) and the Expected Value Problem (EVV)
          are solved to compute the VSS as: VSS = EVV-RP as well as the Wait and See Problem (WS) is 
-         solved to compute the EVPI as EVPI = WS-RP.
+         solved to compute the EVPI as EVPI = RP - WS.
         """
         
         # #########################################################
         # RECOURSE PROBLEM
         # #########################################################
         """
-        Here we make a first stage decision and then we solve the second stage solutions and average 
-        those in order to understand the profit for each of the scenarios based on the first assumption
-        and the demand. 
+        Here we make a first stage decision and then we solve the second stage problems one per each scenario
+        and average their solutions in order to compute the objective function value of the RECOURSE PROBLEM. 
         """
         demand_RP = sam.sample_stoch(
             inst,
-            n_scenarios=n_scenarios
+            n_scenarios=n_scenarios,
+            distribution=distribution
         )
         test = Tester()
 
@@ -186,8 +183,8 @@ if __name__ == '__main__':
             demand_RP
         )
 
-        RP = np.average(ris_RP)
-        print("\nRecourse problem solution (RP)", RP)
+        RP = np.mean(ris_RP) #take the expected value over all the scenarios (mean because scenarios are assumed equiprobable)
+        
     
         # #########################################################
         # EXPECTED VALUE PROBLEM and the VALUE OF THE STOCHASTIC SOLUTION
@@ -196,12 +193,13 @@ if __name__ == '__main__':
         The Scenarios are all blend together and only the average of them is considered.
         The resulting solution is clearly suboptimal but allows us to understand how 
         much we can gain from the fact that we consider the stochasticity with respect
-        to not considering it at all and so, just considering the Exected Value of the demand.
+        to not considering it at all and so, just considering the Expected Value of the demand.
         """
 
         EV_demand_matrix = sam.sample_ev(
             inst,
-            n_scenarios=n_scenarios
+            n_scenarios=n_scenarios,
+            distribution=distribution
         )
 
         of_EV, sol_EV, comp_time_EV = prb.solve_EV(
@@ -212,7 +210,8 @@ if __name__ == '__main__':
 
         demand_EV = sam.sample_stoch(
             inst,
-            n_scenarios=n_scenarios
+            n_scenarios=n_scenarios,
+            distribution=distribution
         )
 
         ris_EV = test.solve_second_stages(
@@ -222,10 +221,12 @@ if __name__ == '__main__':
             demand_EV
         )
 
-        EVV = np.average(ris_EV)
+        EEV = np.average(ris_EV)
         
-        print("\nExpected result of EV solution (EVV): ", EVV)
-        print("\nValue of the Stochastic Solution (VSS = EVV-RP):", EVV-RP)
+        print("\nRecourse problem solution (RP)", RP)
+        print("\nEV solution (EV): ", of_EV)
+        print("\nExpected result of EV solution (EEV): ", EEV)
+        print("\nValue of the Stochastic Solution (VSS = EEV-RP):", EEV-RP)
 
 
         # ##########################################################
@@ -239,7 +240,8 @@ if __name__ == '__main__':
         """
         WS_demand = sam.sample_stoch(
             inst,
-            n_scenarios=n_scenarios
+            n_scenarios=n_scenarios,
+            distribution=distribution
         )
         ris2, WS_sol = test.solve_wait_and_see(
             inst,
@@ -247,7 +249,7 @@ if __name__ == '__main__':
             WS_demand
         )
         print("\nWait and see solution (WS): ", WS_sol)
-        print("\nExpected value of perfect information (EVPI = WS-RP): ", WS_sol-RP)
+        print("\nExpected value of perfect information (EVPI = RP-WS): ", RP-WS_sol)
 
     # ##########################################################
     # IN SAMPLE STABILITY ANALYSIS
@@ -275,7 +277,7 @@ if __name__ == '__main__':
             [in_samp_exact, in_samp_heu],
             ["exact", "heuristic"],
             ['red', 'blue'], "In Sample Stability",
-            "profit", "occurencies"
+            "Objective Function value (€)", "Occurrences"
         )
 
         rows = zip(in_samp_exact, in_samp_heu)
@@ -309,7 +311,7 @@ if __name__ == '__main__':
             [out_samp_exact, out_samp_heu],
             ["exact", "heuristic"],
             ['red', 'blue'], "Out of Sample Stability",
-            "profit", "occurencies"
+            "Objective Function value (€)", "Occurrences"
         )
 
         rows = zip(out_samp_exact, out_samp_heu)
@@ -377,6 +379,7 @@ if __name__ == '__main__':
                 search_penalty_alpha()
             elif (option == "vss_evpi"):
                 vss_evpi()
+                break
             elif (option == "test_in_sample"):
                 inp = input("Choose the number of Scenario Trees you want to build\n")
                 test_in_sample(n_rep=int(inp))

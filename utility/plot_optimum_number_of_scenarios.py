@@ -16,7 +16,7 @@ for i,row in enumerate(file.values):
     plt.plot(range(100,1001,100),row,marker=markers[i],linewidth=2.5)
 plt.legend(distributions,fontsize=12)
 plt.xlabel("Cardinality of the scenario tree",fontsize=12)
-plt.ylabel("Objective function value",fontsize=12)
+plt.ylabel("Objective function value (€)",fontsize=12)
 plt.xticks(range(100,1001,100),fontsize=12)
 plt.yticks(fontsize=12)
 plt.show()
