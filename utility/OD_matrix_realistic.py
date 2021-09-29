@@ -1,6 +1,5 @@
 import numpy as np
-import random
-import math
+
 
 
 class Generator:
@@ -65,7 +64,7 @@ class Generator:
         return np.floor( self.prob_matrix * np.around(np.random.exponential(self.std_od_matrix_expo))
         )
 
-if __name__=="__main__":
-    gen = Generator(500,22)
+# if __name__=="__main__":
+#     gen = Generator(500,22)
     
     

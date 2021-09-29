@@ -64,7 +64,7 @@ class Generator():
         return np.floor(
             self.prob_matrix * np.around(np.random.exponential(self.mean_od_matrix))
         )
-if __name__=="__main__":
-    gen = Generator(500,22)
-    print(gen.min_od_matrix)
-    print(gen.max_od_matrix)
+# if __name__=="__main__":
+#     gen = Generator(500,22)
+#     print(gen.min_od_matrix)
+#     print(gen.max_od_matrix)
