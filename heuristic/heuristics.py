@@ -104,7 +104,7 @@ class ProgressiveHedging():
         if iteration!= 0:
             relax = np.dot(lambd.T,(np.array(sol)-TGS))
             penalty = (pen_rho/2)*(np.dot((np.array(sol)-TGS),(np.array(sol)-TGS).T))
-            # penalty = (pen_rho/2) *np.linalg.norm(np.array(sol)-TGS)
+            
             obj_funct += relax
         
             obj_funct += penalty
@@ -212,8 +212,7 @@ class ProgressiveHedging():
             of, sol = self.DEP_solver(dict_data, s, TGS, lam[i], rho)
             of_array.append(of)
             ans.append(np.array(sol))
-        x_s_arrays = np.stack(ans)
-        
+        x_s_arrays = ans
         
         # compute temporary global solution for first iteration
         TGS = np.average(x_s_arrays, axis=0).astype(int)
@@ -234,7 +233,7 @@ class ProgressiveHedging():
                 of, sol = self.DEP_solver(dict_data, s, TGS, lam[i], rho, k)
                 of_array.append(of)
                 ans.append(np.array(sol))
-            x_s_arrays = np.stack(ans)
+            x_s_arrays = ans
 
             # compute temporary global solution for first iteration
             TGS = np.average(x_s_arrays, axis=0).astype(int)

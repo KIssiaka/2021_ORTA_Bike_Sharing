@@ -10,6 +10,7 @@ from solver.BikeSharing import BikeSharing
 from heuristic.heuristics import ProgressiveHedging
 from solver.sampler import Sampler
 from utility.plot_results import plot_comparison_hist
+from utility.plot_optimum_number_of_scenarios import plot_opt_num_scenarios
 import csv
 import sys
 import getopt
@@ -355,13 +356,7 @@ if __name__ == '__main__':
                 writer.writerow([distributions[i]]+val)    
             f.close()
 
-        for val in obj_values_distr:
-            plt.plot(range(100,1001,100),val)
-        plt.legend(distributions)
-        plt.xlabel("Cardinality of the scenario tree")
-        plt.ylabel("Objective function value")
-        plt.xticks(range(100,1001,100))
-        plt.show()
+        plot_opt_num_scenarios()
         
         
     # ##########################################################
