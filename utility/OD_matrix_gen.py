@@ -15,7 +15,8 @@ class Generator():
     2. "n_scenarios" OD matrices belonging to range [minimum, maximum]
     3. compute the mean and standard deviation over all the generated matrices 
     4. generates "n_scenarios" OD matrices by using a monte carlo sampling according to 3 different distributions:
-        Uniform, Normal and Exponential.
+        Uniform, Normal and Exponential and each trip occurs with a probability that is inversely
+        proportional to the distance between stations.
     """
     def __init__(self, n_scenarios = 1000, n_stations = 22, distr = 'norm'):
         self.min_od_matrix = np.around(np.absolute(np.random.uniform(
