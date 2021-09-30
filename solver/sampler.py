@@ -4,6 +4,11 @@ import utility.OD_matrix_gen as gen
 import utility.OD_matrix_realistic as gen_real
 
 class Sampler:
+    """Class representing the sampler of scenarios.
+    It has two methods:
+        1. sample_ev() to sample the scenario to solve the EV problem
+        2. sample_stoch() to sample "n_scenarios" 
+    """
     def __init__(self):
         pass
 

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import time
-import math
-import logging
 import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
 
 class ProgressiveHedging():
+    """Class representing the PH heuristics method.
+    It has two methods:
+        1. DEP_solver() to solve the deterministic problem with Augmented Relaxation
+        2. solve() is the actual Progressive Hedging algorithm
+    """
     def __init__(self):
         pass
 

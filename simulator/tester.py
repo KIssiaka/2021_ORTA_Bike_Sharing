@@ -1,33 +1,19 @@
 # -*- coding: utf-8 -*-
-import os
 import time
-import logging
-import json
 import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
 
 
 class Tester():
+    """Class containing different useful methods:
+        1. solve_second_stage() to solve the second stage problem
+        2. solve_wait_and_see() to solve the WS problem used to compute the EVPI
+        3. in_sample_stability() to analyze the in-sample stability of the scenario generation method
+        4. out_of_sample_stability() to analyze the out-of-sample stability of the scenario generation method
+    """
     def __init__(self):
         pass
-
-    def compare_sols_lst(
-        self, inst, sampler, sols, labels, n_scenarios
-    ):
-        ans_dict = {}
-        reward = sampler.sample_stoch(
-            inst,
-            n_scenarios=n_scenarios
-        )
-        for j in range(len(sols)):
-            profit_raw_data = self.solve_second_stages(
-                inst, sols[j],
-                n_scenarios, reward
-            )
-            ans_dict[labels[j]] = profit_raw_data
-
-        return ans_dict
 
     def solve_second_stages(self, 
         inst, sol, n_scenarios, demand_matrix

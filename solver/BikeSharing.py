@@ -7,6 +7,11 @@ import numpy as np
 
 
 class BikeSharing():
+    """Class representing the Exact Solver GUROBI.
+    It has methods:
+       1. solve() to solve the deterministic problem optimally
+       2. solve_EV() to solve the Expected Value problem
+    """
     def __init__(self):
         pass
 

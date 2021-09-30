@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_opt_num_scenarios():
+    """Method to plot the graph used to choose which is the optimum cardinality for a Scenario Tree
+    """
     file = pd.read_csv("./results/optimum_num_scenarios.csv",index_col=0,header=0)
     distributions = ["norm","uni","expo"]
     
@@ -22,6 +24,7 @@ def plot_opt_num_scenarios():
     plt.xticks(range(100,1001,100),fontsize=12)
     plt.yticks(fontsize=12)
     plt.show()
+    plt.savefig(f"./results/Optimum number of scenarios.png")
 
 
 

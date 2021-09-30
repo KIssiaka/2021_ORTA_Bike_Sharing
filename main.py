@@ -38,16 +38,6 @@ if __name__ == '__main__':
 
     # Reward generation
     n_scenarios = 500
-    """
-    We create the demand matrixes by using a monte carlo distribution that chooses between:
-    - exponential
-    - uniform 
-    - normal 
-    distributions.
-    To use it, pass "monte_carlo" as distribution variable value, otherwise choose among "expo", "uni" or "norm".
-    By default, it is set the "norm" distribution.
-    We also pass the inst variable which contains all the input settings.
-    """
     distribution = "norm"
 
     help_str = 'main.py -n <n_scenarios> -d <distribution>'
@@ -78,7 +68,12 @@ if __name__ == '__main__':
     
     def solve_exact():
         """
-        here we compute the exact solution using the model written in the paper
+        Here we compute the exact solution with GUROBI. We then save results in a csv file.
+        It contains a table with columns: 
+        1. Method (Exact),
+        2. Objective function value in euro
+        3. Computational Time
+        4. First stage solution (number of bikes to put per stations at the beginning of each day)
         """
         print("EXACT METHOD")
         file_output = open(
@@ -100,7 +95,13 @@ if __name__ == '__main__':
     
     def solve_heu():
         """
-        heuristic solution using the progressive hedging algorithm
+        heuristic solution using the Progressive Hedging algorithm. We then save the solution in a csv file.
+        It contains a table with columns: 
+        1. Method (Heuristics),
+        2. Objective function value in euro
+        3. Computational Time
+        4. Number of iterations
+        5. First stage solution (number of bikes to put per stations at the beginning of each day)
         """
         print("HEURISTIC METHOD")
         file_output = open(
@@ -123,6 +124,9 @@ if __name__ == '__main__':
     # SEARCH FOR GOOD VALUES OF PENALTY AND ALPHA
     # ########################################################
     def search_penalty_alpha():
+        """
+        Method to find the initial pair of values of penalty and alpha for PH algorithm.
+        """
         print("SEARCHING FOR GOOD VALUES OF PENALTY AND ALPHA")
         file_output = open(
             "./results/search_penalty_alpha.csv",
@@ -183,38 +187,44 @@ if __name__ == '__main__':
             n_scenarios,
             demand_RP
         )
-
-        RP = np.mean(ris_RP) #take the expected value over all the scenarios (mean because scenarios are assumed equiprobable)
+        
+        #take the expected value over all the scenarios (mean because scenarios are assumed equiprobable)
+        RP = np.mean(ris_RP) 
         
     
         # #########################################################
         # EXPECTED VALUE PROBLEM and the VALUE OF THE STOCHASTIC SOLUTION
         # #########################################################
         """
-        The Scenarios are all blend together and only the average of them is considered.
+        The Scenarios are all blend together and only a scenario given by the average of them is considered.
         The resulting solution is clearly suboptimal but allows us to understand how 
         much we can gain from the fact that we consider the stochasticity with respect
         to not considering it at all and so, just considering the Expected Value of the demand.
         """
-
+        # take the average scenario
         EV_demand_matrix = sam.sample_ev(
             inst,
             n_scenarios=n_scenarios,
             distribution=distribution
         )
 
+        # Solve the Expected Value (EV) Problem and save the EV solution
         of_EV, sol_EV, comp_time_EV = prb.solve_EV(
             inst,
             EV_demand_matrix,
             verbose=True
         )
 
+        # Sample new scenarios
         demand_EV = sam.sample_stoch(
             inst,
             n_scenarios=n_scenarios,
             distribution=distribution
         )
 
+        # use the EV solution as the first stage solution 
+        # for the stochastic program and compute the expected value of 
+        # the objective function over several scenarios
         ris_EV = test.solve_second_stages(
             inst,
             sol_EV,
@@ -257,11 +267,11 @@ if __name__ == '__main__':
     # ##########################################################
     def test_in_sample(n_scenarios=500, n_rep=20):
         """
-        Here we analyze the in sample stability for our scenario tree generation.
+        Here we analyze the in sample stability for our scenario tree generation method.
         This requirement guarantees that whichever scenario tree we choose, the optimal
         value of the objective function reported by the model itself is (approximately) 
-        the same. We evaluate different solutions on different generated trees and if 
-        the results are similar, we have in sample stability.
+        the same. We evaluate different solutions on "n_rep" generated trees with cardinality
+        "n_scenarios" and if the results are similar, we have in sample stability.
         """
         test = Tester()
         prb = BikeSharing()
@@ -332,10 +342,6 @@ if __name__ == '__main__':
         
         Results are then saved in a csv to plot easly them and see where the 
         objective function value is pretty constant.
-
-        Returns
-        -------
-        None.
 
         """
         test = Tester()
