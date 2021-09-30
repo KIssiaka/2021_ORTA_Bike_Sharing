@@ -24,10 +24,10 @@ To see the full work please see the [documentation](https://github.com/AndreaMin
 
 ## Code Organization
 The code is written in Python and organized in several folders. To launch the program, it is important to launch the [main.py](https://github.com/AndreaMinardi/2021_ORTA_Bike_Sharing/blob/main/main.py) file. 
-From the terminal, run: python3 main.py -n <n_scenarios> -d <distribution>
+From the terminal, run: python3 main.py [-n <n_scenarios>] [-d <distribution>]
 
-1. -n <n_scenarios> represents the cardinality of the scenario tree you want to use (by default = 500)
-2.  -d <distribution> represents the distribution you want to use to build scenarios (choose among "norm" for Gaussian, "uni"  for Uniform, "expo" for exponential)
+1. [-n <n_scenarios>] represents the cardinality of the scenario tree you want to use (by default = 500)
+2.  [-d <distribution>] represents the distribution you want to use to build scenarios (choose among "norm" for Gaussian, "uni"  for Uniform, "expo" for exponential)
 
 The main.py contains a menù through which you can:
 1. solve the problem with the **Exact Solver** GUROBI;
