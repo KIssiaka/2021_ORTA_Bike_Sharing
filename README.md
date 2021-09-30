@@ -20,10 +20,10 @@ The focus of our work was to find a better solution for bike sharing systems wit
 
 The main strength of our PH heuristic method lays in the ability to find solutions with hypothetical real scenarios having a large number of bike stations considered in the computation. This, indeed, turned out to be not feasible with the used exact solver.
 
-To see the full work please see the [documentation].(https://github.com/AndreaMinardi/2021_ORTA_Bike_Sharing/blob/main/2021_ORTA_BikeSharing.pdf)
+To see the full work please see the [documentation](https://github.com/AndreaMinardi/2021_ORTA_Bike_Sharing/blob/main/2021_ORTA_BikeSharing.pdf).
 
 ## Code Organization
-The code is written in Python and organized in several folders. To launch the program, it is important to lunch the [main.py](https://github.com/AndreaMinardi/2021_ORTA_Bike_Sharing/blob/main/main.py) file. 
+The code is written in Python and organized in several folders. To launch the program, it is important to launch the [main.py](https://github.com/AndreaMinardi/2021_ORTA_Bike_Sharing/blob/main/main.py) file. 
 From the terminal, run: python3 main.py -n <n_scenarios> -d <distribution>
 
 1. -n <n_scenarios> represents the cardinality of the scenario tree you want to use (by default = 500)
