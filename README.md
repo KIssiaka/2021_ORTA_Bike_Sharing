@@ -47,5 +47,5 @@ The main.py contains a menù through which you can:
 
 
 ### Developers
-(c) 2021, [Francesco Conforte](https://github.com/FrancescoConforte), [Paolo De Santis](https://github.com/paolodesa), [Andrea Minardi](https://github.com/AndreaMinardi), [Jacopo Braccio](https://github.com/https://github.com/jacopobr).
+(c) 2021, [Francesco Conforte](https://github.com/FrancescoConforte), [Paolo De Santis](https://github.com/paolodesa), [Andrea Minardi](https://github.com/AndreaMinardi), [Jacopo Braccio](https://github.com/jacopobr).
 
