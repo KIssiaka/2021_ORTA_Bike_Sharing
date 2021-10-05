@@ -1,5 +1,5 @@
 <p align="right">
-<img src="fig/polito_logo_2021_blu.jpg" alt="Logo" width="150" height="110">
+<img src="fig/polito_logo.jpg" alt="Logo" width="150" height="110">
 </p>
 
 # **Stochastic optimization models for a bike-sharing repositioning problem (BRP)**
