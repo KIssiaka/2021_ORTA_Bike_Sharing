@@ -45,8 +45,8 @@ The main.py contains a menù through which you can:
 2. solve the problem with the **Progressive Hedging** algorithm;
 3. find the initial pair of values of penalty and alpha for PH;
 4. compute the Value of Stochastic Solution (**VSS**) and the Expected Value of Perfect Information (**EVPI**);
-5. perform the **in-sample stability**;
-6. perform the **out-of-sample stability**;
+5. perform the **in-sample stability** analysis;
+6. perform the **out-of-sample stability** analysis;
 7. find the **optimum number of scenarios**.
 
 
