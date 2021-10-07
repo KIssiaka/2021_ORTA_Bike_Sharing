@@ -2,7 +2,7 @@
 <img src="fig/polito_logo.png" alt="Logo" width="190" height="110">
 </p>
 
-# **Stochastic optimization models for a bike-sharing repositioning problem (BRP)**
+# **Stochastic optimization methods for a bike-sharing repositioning problem (BRP)**
 
 This work is a project developed for the Operational Research course of ICT4SS at Politecnico di Torino.
 The main purpose was to develop stochastic optimization models to solve a bike-sharing repositioning problem (BRP). 
