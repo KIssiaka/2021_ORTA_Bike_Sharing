@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import numpy as np
-import gurobipy as gp
-from gurobipy import GRB
+from docplex.mp.model import Model
 
 class ProgressiveHedging():
     """Class representing the PH heuristics method.
@@ -15,182 +14,166 @@ class ProgressiveHedging():
 
     def DEP_solver(self, dict_data, scenario_input, TGS, lambd=0, pen_rho=0, iteration=0):
         problem_name = "DEP"
-        model = gp.Model(problem_name)
+        model = Model(problem_name)
         n_stations = dict_data['n_stations']
         stations = range(n_stations)
                 
         ### Variables
-        X = model.addVars(
+        X = model.integer_var_list(
             n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='X'
         )
         
-        I_plus = model.addVars(
+        I_plus = model.integer_var_list(
             n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='I+'
         )
 
-        I_minus = model.addVars(
+        I_minus = model.integer_var_matrix(
             n_stations, n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='I-'
         )
 
-        O_plus = model.addVars(
+        O_plus = model.integer_var_list(
             n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='O+'
         )
 
-        O_minus = model.addVars(
+        O_minus = model.integer_var_list(
             n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='O-'
         )
 
-        T_plus = model.addVars(
+        T_plus = model.integer_var_list(
             n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='T+'
         )
 
-        T_minus = model.addVars(
+        T_minus = model.integer_var_list(
             n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='T-'
         )
 
 
-        tau = model.addVars(
+        tau = model.integer_var_matrix(
             n_stations, n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='tau'
         )
 
-        beta = model.addVars(
+        beta = model.integer_var_matrix(
             n_stations, n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='beta'
         )
 
-        rho = model.addVars(
+        rho = model.integer_var_matrix(
             n_stations, n_stations,
             lb=0,
-            vtype=GRB.INTEGER,
             name='rho'
         )
-        model.update()
+        
         sol = [X[i] for i in stations]
 
 
         ## Objective Function
-        obj_funct = dict_data["procurement_cost"] * gp.quicksum(X[i] for i in stations)
+        obj_funct = dict_data["procurement_cost"] * model.sum(X[i] for i in stations)
         
-        obj_funct += gp.quicksum(
+        obj_funct += model.sum(
             (
-                dict_data['stock_out_cost'][i]*gp.quicksum(I_minus[i, j] for j in stations) +
+                dict_data['stock_out_cost'][i]*model.sum(I_minus[i, j] for j in stations) +
                 dict_data["time_waste_cost"][i]*O_minus[i] +
-                gp.quicksum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
+                model.sum(dict_data['trans_ship_cost'][i][j]*tau[i, j]  for j in stations)
             ) for i in stations
         )
-        if iteration!= 0:
-            relax = np.dot(lambd.T,(np.array(sol)-TGS))
-            penalty = (pen_rho/2)*(np.dot((np.array(sol)-TGS),(np.array(sol)-TGS).T))
+        if iteration != 0:
+            relax = np.dot(lambd.T, (np.array(sol) - TGS))
+            penalty = (pen_rho / 2) * (np.dot((np.array(sol) - TGS), (np.array(sol) - TGS).T))
             
             obj_funct += relax
-        
             obj_funct += penalty
 
+        model.minimize(obj_funct)
 
-        model.setObjective(obj_funct, GRB.MINIMIZE)
 
-
-        ### Costraints
+        ### Constraints
 
         for i in stations:
-            model.addConstr(
+            model.add_constraint(
                 X[i] <= dict_data['station_cap'][i],
-                f"station_bike_limit"
+                f"station_bike_limit_{i}"
             )
             
         for i in stations:
             for j in stations:
-                model.addConstr(
+                model.add_constraint(
                     beta[i, j] == scenario_input[i, j] - I_minus[i, j],
-                    f"rented_bikes_number"
+                    f"rented_bikes_number_{i}_{j}"
                 )
             
         for i in stations:
-            model.addConstr(
-                I_plus[i] - gp.quicksum(I_minus[i,j] for j in stations) == X[i] - gp.quicksum(scenario_input[i, j]for j in stations),
-                f"surplus_shortage_balance"
+            model.add_constraint(
+                I_plus[i] - model.sum(I_minus[i, j] for j in stations) == X[i] - model.sum(scenario_input[i, j] for j in stations),
+                f"surplus_shortage_balance_{i}"
             )
 
         for i in stations:
-            model.addConstr(
-                O_plus[i] - O_minus[i] == dict_data['station_cap'][i] - X[i] + gp.quicksum(beta[i,j] for j in stations) - gp.quicksum(beta[j, i] for j in stations),
-                f"residual_overflow_balance"
+            model.add_constraint(
+                O_plus[i] - O_minus[i] == dict_data['station_cap'][i] - X[i] + model.sum(beta[i, j] for j in stations) - model.sum(beta[j, i] for j in stations),
+                f"residual_overflow_balance_{i}"
             )
 
         for i in stations:
-            model.addConstr(
-                gp.quicksum(rho[i,j] for j in stations) == O_minus[i],
-                f"redir_bikes_eq_overflow"
+            model.add_constraint(
+                model.sum(rho[i, j] for j in stations) == O_minus[i],
+                f"redir_bikes_eq_overflow_{i}"
             )
 
         for i in stations:
-            model.addConstr(
-                gp.quicksum(rho[j,i] for j in stations) <= O_plus[i],
-                f"redir_bikes_not_resid_cap"
+            model.add_constraint(
+                model.sum(rho[j, i] for j in stations) <= O_plus[i],
+                f"redir_bikes_not_resid_cap_{i}"
             )
 
         for i in stations:
-            model.addConstr(
-                T_plus[i] - T_minus[i] == dict_data['station_cap'][i] - O_plus[i] + gp.quicksum(rho[j,i] for j in stations) - X[i],
-                f"exceed_failure_balance"
+            model.add_constraint(
+                T_plus[i] - T_minus[i] == dict_data['station_cap'][i] - O_plus[i] + model.sum(rho[j, i] for j in stations) - X[i],
+                f"exceed_failure_balance_{i}"
             )
 
         for i in stations:
-            model.addConstr(
-                gp.quicksum(tau[i,j] for j in stations) == T_plus[i],
-                f"tranship_equal_excess"
+            model.add_constraint(
+                model.sum(tau[i, j] for j in stations) == T_plus[i],
+                f"tranship_equal_excess_{i}"
             )
 
         for i in stations:
-            model.addConstr(
-                gp.quicksum(tau[j,i] for j in stations) <= T_minus[i],
-                f"tranship_equal_failure"
+            model.add_constraint(
+                model.sum(tau[j, i] for j in stations) <= T_minus[i],
+                f"tranship_equal_failure_{i}"
             )
 
+        model.set_log_output(None)
+        solution = model.solve()
 
-        model.update()
-        model.setParam('OutputFlag', 0)
-        model.optimize()
         sol = [0] * dict_data['n_stations']
         of = -1
-        if model.status == GRB.Status.OPTIMAL:
+        if solution:
             for i in stations:
-                grb_var = model.getVarByName(
-                    f"X[{i}]"
-                )
-                sol[i] = grb_var.X
-            of = model.getObjective().getValue()
+                sol[i] = X[i].solution_value
+            of = model.objective_value
         return of, np.array(sol)
     
 
     def solve(
-        self, instance, scenarios, n_scenarios, rho = 70, alpha=100
+        self, instance, scenarios, n_scenarios, rho=70, alpha=100
     ):
         ans = []
         of_array = []
@@ -202,10 +185,10 @@ class ProgressiveHedging():
         # max iterations
         maxiter = 100
 
-        #iteration
-        k=0
+        # iteration
+        k = 0
 
-        #lagrangian multiplier
+        # lagrangian multiplier
         lam = np.zeros((n_scenarios, dict_data['n_stations']))
         start = time.time()
         # solve the base problem for each of the solutions 
@@ -219,14 +202,13 @@ class ProgressiveHedging():
         
         # compute temporary global solution for first iteration
         TGS = np.average(x_s_arrays, axis=0).astype(int)
-        lam = rho*(x_s_arrays - TGS)
+        lam = rho * (x_s_arrays - TGS)
 
-        for k in range(1, maxiter+1):
+        for k in range(1, maxiter + 1):
 
-            if ( np.all(abs(x_s_arrays-TGS) == 0) ):
+            if np.all(abs(x_s_arrays - TGS) == 0):
                 break
 
-   
             x_s_arrays = []
             of_array = []
             ans = []
@@ -240,11 +222,10 @@ class ProgressiveHedging():
 
             # compute temporary global solution for first iteration
             TGS = np.average(x_s_arrays, axis=0).astype(int)
-            
 
             # update the multipliers
-            lam = lam + rho*(x_s_arrays - TGS)
-            rho = alpha*rho
+            lam = lam + rho * (x_s_arrays - TGS)
+            rho = alpha * rho
 
         end = time.time()
         comp_time = end - start

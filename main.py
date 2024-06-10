@@ -90,7 +90,7 @@ if __name__ == '__main__':
         file_output.write("{}, {}, {}, {}\n".format(
             "exact", of_exact, comp_time_exact, ' '.join(str(e) for e in sol_exact)
         ))
-        print("To see results, open the file: /results/exact_method.csv")
+        print("To see results, open the file: /results/exact_method.csv", demand_matrix)
 
     
     def solve_heu():
