@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
 
     # Reward generation
-    n_scenarios = 1
+    n_scenarios = 100
     distribution = "norm"
 
     help_str = 'BssMonModel/BSSmonmodel.py -n <n_scenarios> -d <distribution>'
