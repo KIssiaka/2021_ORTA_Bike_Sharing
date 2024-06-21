@@ -5,5 +5,5 @@
 	"station_max_cap": 30,
     "station_min_cap": 30,
     "inventaire_avant_rebalancement": 10,
-    "n_stations": 22
+    "n_stations": 55
 }

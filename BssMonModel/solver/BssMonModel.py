@@ -40,7 +40,8 @@ class BikeSharing():
 
         obj_funct += model.sum(
             (
-                dict_data['Ruptures'][i] * model.sum(r[i, j, s] for j in stations) + y_l[i, s] + y_u[i, s]
+                dict_data['Ruptures'][i] * model.sum(r[i, j, s] for j in stations) 
+                #+ y_l[i, s] + y_u[i, s]
             )
             for i in stations for s in scenarios
         ) / (n_scenarios + 0.0)
@@ -69,17 +70,20 @@ class BikeSharing():
             for s in scenarios:
                 model.add_constraint(
                     y_u[i, s] <= dict_data['station_cap'][i] - In[0][i] 
-                    #+ (model.sum(demand_matrix[i, j, s] for j in stations) - model.sum(demand_matrix[j, i, s] for j in stations)),
-                    ,ctname=f"Réapprovisionnement_en_fonction_de_la_capacité_résiduelle_de_{i}_scénario_{s}"
+                    + (model.sum(beta[i, j, s] for j in stations) - model.sum(beta[j, i, s] for j in stations)),
+                    ctname=f"Réapprovisionnement_en_fonction_de_la_capacité_résiduelle_de_{i}_scénario_{s}"
                 )
+                #print(dict_data['station_cap'][i] - initial_stocks[i] 
+                 #   + (model.sum(beta[i, j, s] for j in stations) - model.sum(beta[j, i, s] for j in stations)))
                 
         for i in stations:
             for s in scenarios:
                 model.add_constraint(
                     y_l[i, s] <= In[0][i]
-                     # - (model.sum(demand_matrix[i, j, s] for j in stations) - model.sum(demand_matrix[j, i, s] for j in stations)),
-                    ,ctname=f"Retrait_en_fonction_du_stock_résiduel_station_{i}_scenario_{s}"
+                    - (model.sum(beta[i, j, s] for j in stations) - model.sum(beta[j, i, s] for j in stations)),
+                    ctname=f"Retrait_en_fonction_du_stock_résiduel_station_{i}_scenario_{s}"
                 )
+                #print(f"Variable Y_U_{i}_{s}: lower bound = {y_u[i, s].lb}, upper bound = {y_u[i, s].ub}")
         
         for i in stations:
             for s in scenarios:
@@ -130,7 +134,7 @@ class BikeSharing():
                     sol_y_l[i, s] = y_l[i, s].solution_value
             of = model.objective_value
 
-        for var in model.iter_variables():
-            print(var.name, "=", var.solution_value)
+        """for var in model.iter_variables():
+            print(var.name, "=", var.solution_value)"""
         return of, sol, comp_time, sol_y_u, sol_y_l
         #return solution
