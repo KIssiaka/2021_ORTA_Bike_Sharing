@@ -9,20 +9,19 @@ class Instance():
         logging.info("starting simulation...")
         
         self.n_stations = sim_setting['n_stations']
-        
-        #c
-        self.procurement_cost = sim_setting['procurement_cost'] 
+
+        #v_i
+        self.I_0 = np.random.randint(low=0, high=30, size=self.n_stations).tolist()
         
         #v_i
-        self.stock_out_cost = [sim_setting['stock_out_cost']] * self.n_stations
+        self.Ruptures = [sim_setting["Ruptures"]] * self.n_stations
         
         #w_i
-        self.time_waste_cost = [sim_setting['time_waste_cost']] * self.n_stations
+        self.Surplus = [sim_setting['Surplus']] * self.n_stations
         
         #t_ij
         self.trans_ship_cost = [[sim_setting['trans_ship_cost'] for x in range(self.n_stations)] for y in range(self.n_stations)] 
         
-        self.I_0 = np.random.randint(low=0, high=30, size=self.n_stations).tolist()
         # k_i
         self.stations_cap = np.around(np.random.uniform(
                                 sim_setting['station_max_cap'],
@@ -33,9 +32,8 @@ class Instance():
 
         logging.info(f"stations_number: {self.n_stations}")
         logging.info(f"inventaires_avant_rebalancement: {self.I_0}")
-        logging.info(f"procurement_costs: {self.procurement_cost}")
-        logging.info(f"stock_out_costs: {self.stock_out_cost}")
-        logging.info(f"time_waste_cost: {self.time_waste_cost}")
+        logging.info(f"Ruptures: {self.Ruptures}")
+        logging.info(f"Surplus: {self.Surplus}")
         logging.info(f"Transshipment_cost: {self.trans_ship_cost}")
         logging.info(f"stations_capacity: {self.stations_cap}")
         logging.info("simulation end")
@@ -43,10 +41,9 @@ class Instance():
     def get_data(self):
         logging.info("getting data from instance...")
         return {
-            "I_0": self.I_0,
-            "procurement_cost": self.procurement_cost,
-            "stock_out_cost": self.stock_out_cost,
-            "time_waste_cost": self.time_waste_cost,
+            "inventaire_avant_rebalancement": self.I_0,
+            "Ruptures": self.Ruptures,
+            "Surplus": self.Surplus,
             "trans_ship_cost": self.trans_ship_cost,
             "n_stations": self.n_stations,
             "station_cap": self.stations_cap
